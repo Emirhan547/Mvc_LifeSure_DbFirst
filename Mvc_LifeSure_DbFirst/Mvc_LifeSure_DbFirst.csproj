@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -45,10 +46,45 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentValidation, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentValidation.8.6.1\lib\net45\FluentValidation.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentValidation.Mvc, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentValidation.Mvc5.8.6.1\lib\net45\FluentValidation.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentValidation.ValidatorAttribute, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentValidation.ValidatorAttribute.8.6.1\lib\net45\FluentValidation.ValidatorAttribute.dll</HintPath>
+    </Reference>
+    <Reference Include="Mapster, Version=6.5.1.0, Culture=neutral, PublicKeyToken=2f39883af23c29a8, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mapster.6.5.1\lib\net45\Mapster.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Ninject, Version=3.3.3.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.3.3\lib\net45\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject.Web.Common, Version=3.3.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.Web.Common.3.3.0\lib\net45\Ninject.Web.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject.Web.Common.WebHost, Version=3.3.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.Web.Common.WebHost.3.3.0\lib\net45\Ninject.Web.Common.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject.Web.Mvc, Version=3.3.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.MVC5.3.3.0\lib\net45\Ninject.Web.Mvc.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ComponentModel.Annotations.4.4.1\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -102,6 +138,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebActivatorEx.2.2.0\lib\net40\WebActivatorEx.dll</HintPath>
+    </Reference>
     <Reference Include="WebGrease">
       <Private>True</Private>
       <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
@@ -119,7 +158,13 @@
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\NinjectWebCommon.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\AboutController.cs" />
+    <Compile Include="Areas\Admin\Controllers\BlogController.cs" />
+    <Compile Include="Areas\Admin\Controllers\FaqController.cs" />
+    <Compile Include="Areas\Admin\Controllers\FeatureController.cs" />
     <Compile Include="Controllers\AboutController.cs" />
     <Compile Include="Controllers\BlogController.cs" />
     <Compile Include="Controllers\DefaultController.cs" />
@@ -129,10 +174,95 @@
     <Compile Include="Controllers\SliderController.cs" />
     <Compile Include="Controllers\TeamController.cs" />
     <Compile Include="Controllers\TestimonialController.cs" />
+    <Compile Include="Dtos\AboutDtos\CreateAboutDto.cs" />
+    <Compile Include="Dtos\AboutDtos\ResultAboutDto.cs" />
+    <Compile Include="Dtos\AboutDtos\UpdateAboutDto.cs" />
+    <Compile Include="Dtos\BlogDtos\CreateBlogDto.cs" />
+    <Compile Include="Dtos\BlogDtos\ResultBlogDto.cs" />
+    <Compile Include="Dtos\BlogDtos\UpdateBlogDto.cs" />
+    <Compile Include="Dtos\FaqDtos\CreateFaqDto.cs" />
+    <Compile Include="Dtos\FaqDtos\ResultFaqDto.cs" />
+    <Compile Include="Dtos\FaqDtos\UpdateFaqDto.cs" />
+    <Compile Include="Dtos\FeatureDtos\CreateFeatureDto.cs" />
+    <Compile Include="Dtos\FeatureDtos\ResultFeatureDto.cs" />
+    <Compile Include="Dtos\FeatureDtos\UpdateFeatureDto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Abouts.cs">
+      <DependentUpon>LifeSureContext.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Blogs.cs">
+      <DependentUpon>LifeSureContext.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Faqs.cs">
+      <DependentUpon>LifeSureContext.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Features.cs">
+      <DependentUpon>LifeSureContext.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\LifeSureContext.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LifeSureContext.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\LifeSureContext.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LifeSureContext.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\LifeSureContext.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LifeSureContext.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Services.cs">
+      <DependentUpon>LifeSureContext.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Sliders.cs">
+      <DependentUpon>LifeSureContext.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Teams.cs">
+      <DependentUpon>LifeSureContext.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Testimonials.cs">
+      <DependentUpon>LifeSureContext.tt</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\AboutRepositories\AboutRepository.cs" />
+    <Compile Include="Repositories\AboutRepositories\IAboutRepository.cs" />
+    <Compile Include="Repositories\BlogRepositories\BlogRepository.cs" />
+    <Compile Include="Repositories\BlogRepositories\IBlogRepository.cs" />
+    <Compile Include="Repositories\FaqRepositories\FaqRepository.cs" />
+    <Compile Include="Repositories\FaqRepositories\IFaqRepository.cs" />
+    <Compile Include="Repositories\FeatureRepositories\FeatureRepository.cs" />
+    <Compile Include="Repositories\FeatureRepositories\IFeatureRepository.cs" />
+    <Compile Include="Repositories\GenericRepositories\GenericRepository.cs" />
+    <Compile Include="Repositories\GenericRepositories\IRepository.cs" />
+    <Compile Include="Repositories\ServiceRepositories\IServiceRepository.cs" />
+    <Compile Include="Repositories\ServiceRepositories\ServiceRepository.cs" />
+    <Compile Include="Repositories\SliderRepositories\ISliderRepository.cs" />
+    <Compile Include="Repositories\SliderRepositories\SliderRepository.cs" />
+    <Compile Include="Repositories\TeamRepositories\ITeamRepository.cs" />
+    <Compile Include="Repositories\TeamRepositories\TeamRepository.cs" />
+    <Compile Include="Repositories\TestimonialRepositories\ITestimonialRepository.cs" />
+    <Compile Include="Repositories\TestimonialRepositories\TestimonialRepository.cs" />
+    <Compile Include="Services\AboutServices\AboutService.cs" />
+    <Compile Include="Services\AboutServices\IAboutService.cs" />
+    <Compile Include="Services\BlogServices\BlogService.cs" />
+    <Compile Include="Services\BlogServices\IBlogService.cs" />
+    <Compile Include="Services\FaqServices\FaqService.cs" />
+    <Compile Include="Services\FaqServices\IFaqService.cs" />
+    <Compile Include="Services\FeatureServices\FeatureService.cs" />
+    <Compile Include="Services\FeatureServices\IFeatureService.cs" />
+    <Compile Include="Validators\AboutValidators\CreateAboutValidator.cs" />
+    <Compile Include="Validators\AboutValidators\UpdateAboutValidator.cs" />
+    <Compile Include="Validators\BlogValidators\CreateBlogValidator.cs" />
+    <Compile Include="Validators\BlogValidators\UpdateBlogValidator.cs" />
+    <Compile Include="Validators\FaqValidators\CreateFaqValidator.cs" />
+    <Compile Include="Validators\FaqValidators\UpdateFaqValidator.cs" />
+    <Compile Include="Validators\FeatureValidators\CreateFeatureValidator.cs" />
+    <Compile Include="Validators\FeatureValidators\UpdateFeatureValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -154,12 +284,30 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Models\LifeSureContext.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>LifeSureContext.edmx</DependentUpon>
+      <LastGenOutput>LifeSureContext.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\LifeSureContext.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>LifeSureContext.edmx</DependentUpon>
+      <LastGenOutput>LifeSureContext.cs</LastGenOutput>
+    </Content>
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <EntityDeploy Include="Models\LifeSureContext.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>LifeSureContext.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\LifeSureContext.edmx.diagram">
+      <DependentUpon>LifeSureContext.edmx</DependentUpon>
+    </Content>
+    <Content Include="Areas\Admin\Views\web.config" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -341,7 +489,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
+    <Folder Include="Areas\Admin\Data\" />
+    <Folder Include="Areas\Admin\Views\About\" />
+    <Folder Include="Areas\Admin\Views\Blog\" />
+    <Folder Include="Areas\Admin\Views\Faq\" />
+    <Folder Include="Areas\Admin\Views\Feature\" />
+    <Folder Include="Areas\Admin\Views\Shared\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
@@ -369,6 +522,9 @@
     <Content Include="Scripts\bootstrap.bundle.js.map" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -403,7 +559,10 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))" />
   </Target>
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
