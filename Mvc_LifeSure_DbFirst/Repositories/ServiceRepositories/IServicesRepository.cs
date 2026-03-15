@@ -3,14 +3,12 @@ using Mvc_LifeSure_DbFirst.Repositories.GenericRepositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Mvc_LifeSure_DbFirst.Repositories.ServiceRepositories
 {
-    public class ServiceRepository : GenericRepository<Services>, IServiceRepository
+    public interface IServicesRepository:IRepository<Models.Services>
     {
-        public ServiceRepository(MvcLifeSureDbEntities context) : base(context)
-        {
-        }
     }
 }

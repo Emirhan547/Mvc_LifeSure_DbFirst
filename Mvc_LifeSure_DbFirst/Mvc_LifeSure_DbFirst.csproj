@@ -165,6 +165,10 @@
     <Compile Include="Areas\Admin\Controllers\BlogController.cs" />
     <Compile Include="Areas\Admin\Controllers\FaqController.cs" />
     <Compile Include="Areas\Admin\Controllers\FeatureController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ServiceController.cs" />
+    <Compile Include="Areas\Admin\Controllers\SliderController.cs" />
+    <Compile Include="Areas\Admin\Controllers\TeamController.cs" />
+    <Compile Include="Areas\Admin\Controllers\TestimonialController.cs" />
     <Compile Include="Controllers\AboutController.cs" />
     <Compile Include="Controllers\BlogController.cs" />
     <Compile Include="Controllers\DefaultController.cs" />
@@ -186,6 +190,18 @@
     <Compile Include="Dtos\FeatureDtos\CreateFeatureDto.cs" />
     <Compile Include="Dtos\FeatureDtos\ResultFeatureDto.cs" />
     <Compile Include="Dtos\FeatureDtos\UpdateFeatureDto.cs" />
+    <Compile Include="Dtos\ServiceDtos\CreateServicesDto.cs" />
+    <Compile Include="Dtos\ServiceDtos\ResultServicesDto.cs" />
+    <Compile Include="Dtos\ServiceDtos\UpdateServicesDto.cs" />
+    <Compile Include="Dtos\SliderDtos\CreateSliderDto.cs" />
+    <Compile Include="Dtos\SliderDtos\ResultSliderDto.cs" />
+    <Compile Include="Dtos\SliderDtos\UpdateSliderDto.cs" />
+    <Compile Include="Dtos\TeamDtos\CreateTeamDto.cs" />
+    <Compile Include="Dtos\TeamDtos\ResultTeamDto.cs" />
+    <Compile Include="Dtos\TeamDtos\UpdateTeamDto.cs" />
+    <Compile Include="Dtos\TestimonialDtos\CreateTestimonialDto.cs" />
+    <Compile Include="Dtos\TestimonialDtos\ResultTestimonialDto.cs" />
+    <Compile Include="Dtos\TestimonialDtos\UpdateTestimonialDto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -239,8 +255,8 @@
     <Compile Include="Repositories\FeatureRepositories\IFeatureRepository.cs" />
     <Compile Include="Repositories\GenericRepositories\GenericRepository.cs" />
     <Compile Include="Repositories\GenericRepositories\IRepository.cs" />
-    <Compile Include="Repositories\ServiceRepositories\IServiceRepository.cs" />
-    <Compile Include="Repositories\ServiceRepositories\ServiceRepository.cs" />
+    <Compile Include="Repositories\ServiceRepositories\IServicesRepository.cs" />
+    <Compile Include="Repositories\ServiceRepositories\ServicesRepository.cs" />
     <Compile Include="Repositories\SliderRepositories\ISliderRepository.cs" />
     <Compile Include="Repositories\SliderRepositories\SliderRepository.cs" />
     <Compile Include="Repositories\TeamRepositories\ITeamRepository.cs" />
@@ -255,6 +271,14 @@
     <Compile Include="Services\FaqServices\IFaqService.cs" />
     <Compile Include="Services\FeatureServices\FeatureService.cs" />
     <Compile Include="Services\FeatureServices\IFeatureService.cs" />
+    <Compile Include="Services\ServiceServices\IServicesService.cs" />
+    <Compile Include="Services\ServiceServices\ServicesService.cs" />
+    <Compile Include="Services\SliderServices\ISliderService.cs" />
+    <Compile Include="Services\SliderServices\SliderService.cs" />
+    <Compile Include="Services\TeamServices\ITeamService.cs" />
+    <Compile Include="Services\TeamServices\TeamService.cs" />
+    <Compile Include="Services\TestimonialServices\ITestimonialService.cs" />
+    <Compile Include="Services\TestimonialServices\TestimonialService.cs" />
     <Compile Include="Validators\AboutValidators\CreateAboutValidator.cs" />
     <Compile Include="Validators\AboutValidators\UpdateAboutValidator.cs" />
     <Compile Include="Validators\BlogValidators\CreateBlogValidator.cs" />
@@ -263,6 +287,14 @@
     <Compile Include="Validators\FaqValidators\UpdateFaqValidator.cs" />
     <Compile Include="Validators\FeatureValidators\CreateFeatureValidator.cs" />
     <Compile Include="Validators\FeatureValidators\UpdateFeatureValidator.cs" />
+    <Compile Include="Validators\ServiceValidators\CreateServicesValidator.cs" />
+    <Compile Include="Validators\ServiceValidators\UpdateServicesValidator.cs" />
+    <Compile Include="Validators\SliderValidators\CreateSliderValidator.cs" />
+    <Compile Include="Validators\SliderValidators\UpdateSliderValidator.cs" />
+    <Compile Include="Validators\TeamValidators\CreateTeamValidator.cs" />
+    <Compile Include="Validators\TeamValidators\UpdateTeamValidator.cs" />
+    <Compile Include="Validators\TestimonialValidators\CreateTestimonialValidator.cs" />
+    <Compile Include="Validators\TestimonialValidators\UpdateTestimonialValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -494,7 +526,11 @@
     <Folder Include="Areas\Admin\Views\Blog\" />
     <Folder Include="Areas\Admin\Views\Faq\" />
     <Folder Include="Areas\Admin\Views\Feature\" />
+    <Folder Include="Areas\Admin\Views\Service\" />
     <Folder Include="Areas\Admin\Views\Shared\" />
+    <Folder Include="Areas\Admin\Views\Slider\" />
+    <Folder Include="Areas\Admin\Views\Team\" />
+    <Folder Include="Areas\Admin\Views\Testimonial\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

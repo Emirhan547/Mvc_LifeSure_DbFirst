@@ -10,6 +10,12 @@ using Mvc_LifeSure_DbFirst.Repositories.TeamRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.TestimonialRepositories;
 using Mvc_LifeSure_DbFirst.Services.AboutServices;
 using Mvc_LifeSure_DbFirst.Services.BlogServices;
+using Mvc_LifeSure_DbFirst.Services.FaqServices;
+using Mvc_LifeSure_DbFirst.Services.FeatureServices;
+using Mvc_LifeSure_DbFirst.Services.ServiceServices;
+using Mvc_LifeSure_DbFirst.Services.SliderServices;
+using Mvc_LifeSure_DbFirst.Services.TeamServices;
+using Mvc_LifeSure_DbFirst.Services.TestimonialServices;
 using Ninject;
 using Ninject.Web.Common;
 using Ninject.Web.Mvc;
@@ -69,8 +75,8 @@ namespace Mvc_LifeSure_DbFirst.App_Start
             kernel.Bind<IFeatureRepository>()
                   .To<FeatureRepository>();
 
-            kernel.Bind<IServiceRepository>()
-                  .To<ServiceRepository>();
+            kernel.Bind<IServicesRepository>()
+                  .To<ServicesRepository>();
 
             kernel.Bind<ISliderRepository>()
                   .To<SliderRepository>();
@@ -87,6 +93,24 @@ namespace Mvc_LifeSure_DbFirst.App_Start
 
             kernel.Bind<IBlogService>()
                 .To<BlogService>();
+
+            kernel.Bind<IFaqService>()
+                .To<FaqService>();
+
+            kernel.Bind<IFeatureService>()
+                .To<FeatureService>();
+
+            kernel.Bind<IServicesService>()
+               .To<ServicesService>();
+
+            kernel.Bind<ISliderService>()
+               .To<SliderService>();
+
+            kernel.Bind<ITeamService>()
+               .To<TeamService>();
+
+            kernel.Bind<ITestimonialService>()
+              .To<TestimonialService>();
         }
     }
 }
