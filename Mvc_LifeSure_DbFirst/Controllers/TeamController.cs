@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mvc_LifeSure_DbFirst.Services.TeamServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,10 +9,16 @@ namespace Mvc_LifeSure_DbFirst.Controllers
 {
     public class TeamController : Controller
     {
-        // GET: Team
+        private readonly ITeamService _teamService;
+
+        public TeamController(ITeamService teamService)
+        {
+            _teamService = teamService;
+        }
         public PartialViewResult Index()
         {
-            return PartialView();
+            var teams = _teamService.GetAll();
+            return PartialView(teams);
         }
     }
 }

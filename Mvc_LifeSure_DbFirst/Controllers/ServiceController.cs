@@ -9,10 +9,16 @@ namespace Mvc_LifeSure_DbFirst.Controllers
 {
     public class ServiceController : Controller
     {
+        private readonly IServicesService _servicesService;
 
+        public ServiceController(IServicesService servicesService)
+        {
+            _servicesService = servicesService;
+        }
         public PartialViewResult Index()
         {
-            return PartialView();
+            var services = _servicesService.GetAll();
+            return PartialView(services);
         }
     }
 }

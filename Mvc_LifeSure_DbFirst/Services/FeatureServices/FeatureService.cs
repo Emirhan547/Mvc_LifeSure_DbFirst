@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Mapster;
+using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Dtos.FeatureDtos;
-using Mvc_LifeSure_DbFirst.Models;
 using Mvc_LifeSure_DbFirst.Repositories.FeatureRepositories;
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ namespace Mvc_LifeSure_DbFirst.Services.FeatureServices
         public void Create(CreateFeatureDto createFeatureDto)
         {
             _createValidator.ValidateAndThrow(createFeatureDto);
-            var mappedFeatures = createFeatureDto.Adapt<Features>();
+            var mappedFeatures = createFeatureDto.Adapt<Feature>();
             _featureRepository.Create(mappedFeatures);
         }
 

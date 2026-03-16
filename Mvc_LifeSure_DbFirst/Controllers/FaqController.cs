@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mvc_LifeSure_DbFirst.Services.FaqServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,10 +9,16 @@ namespace Mvc_LifeSure_DbFirst.Controllers
 {
     public class FaqController : Controller
     {
-        // GET: Faq
+        private readonly IFaqService _faqService;
+
+        public FaqController(IFaqService faqService)
+        {
+            _faqService = faqService;
+        }
         public PartialViewResult Index()
         {
-            return PartialView();
+            var faqs = _faqService.GetAll();
+            return PartialView(faqs);
         }
     }
 }

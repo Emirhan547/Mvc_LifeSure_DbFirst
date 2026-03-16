@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Mapster;
+using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Dtos.SliderDtos;
-using Mvc_LifeSure_DbFirst.Models;
 using Mvc_LifeSure_DbFirst.Repositories.SliderRepositories;
 using System;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace Mvc_LifeSure_DbFirst.Services.SliderServices
         public void Create(CreateSliderDto create)
         {
             _createValidators.ValidateAndThrow(create);
-            var mappedSliders = create.Adapt<Sliders>();
+            var mappedSliders = create.Adapt<Slider>();
             _sliderRepository.Create(mappedSliders);
         }
 

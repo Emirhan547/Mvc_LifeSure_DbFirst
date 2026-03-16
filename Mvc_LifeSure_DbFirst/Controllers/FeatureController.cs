@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mvc_LifeSure_DbFirst.Services.FeatureServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,10 +9,16 @@ namespace Mvc_LifeSure_DbFirst.Controllers
 {
     public class FeatureController : Controller
     {
-        // GET: Feature
+        private readonly IFeatureService _featureService;
+
+        public FeatureController(IFeatureService featureService)
+        {
+            _featureService = featureService;
+        }
         public PartialViewResult Index()
         {
-            return PartialView();
+            var features = _featureService.GetAll();
+            return PartialView(features);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mvc_LifeSure_DbFirst.Services.TestimonialServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,10 +9,16 @@ namespace Mvc_LifeSure_DbFirst.Controllers
 {
     public class TestimonialController : Controller
     {
-        // GET: Testimonial
+        private readonly ITestimonialService _testimonialService;
+
+        public TestimonialController(ITestimonialService testimonialService)
+        {
+            _testimonialService = testimonialService;
+        }
         public PartialViewResult Index()
         {
-            return PartialView();
+            var testimonials = _testimonialService.GetAll();
+            return PartialView(testimonials);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mvc_LifeSure_DbFirst.Services.SliderServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,10 +9,16 @@ namespace Mvc_LifeSure_DbFirst.Controllers
 {
     public class SliderController : Controller
     {
-        // GET: Slider
+        private readonly ISliderService _sliderService;
+
+        public SliderController(ISliderService sliderService)
+        {
+            _sliderService = sliderService;
+        }
         public PartialViewResult Index()
         {
-            return PartialView();
+            var sliders = _sliderService.GetAll();
+            return PartialView(sliders);
         }
     }
 }

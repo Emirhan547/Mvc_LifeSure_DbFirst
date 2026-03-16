@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using Mapster;
+using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Dtos.ServiceDtos;
 using Mvc_LifeSure_DbFirst.Dtos.TeamDtos;
-using Mvc_LifeSure_DbFirst.Models;
 using Mvc_LifeSure_DbFirst.Repositories.TeamRepositories;
 using System;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace Mvc_LifeSure_DbFirst.Services.TeamServices
         public void Create(CreateTeamDto create)
         {
            _createValidators.ValidateAndThrow(create);
-            var mappedTeams = create.Adapt<Teams>();
+            var mappedTeams = create.Adapt<Team>();
             _repository.Create(mappedTeams);
         }
 

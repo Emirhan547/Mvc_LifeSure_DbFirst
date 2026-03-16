@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mvc_LifeSure_DbFirst.Services.BlogServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,10 +9,16 @@ namespace Mvc_LifeSure_DbFirst.Controllers
 {
     public class BlogController : Controller
     {
-        // GET: Blog
+        private readonly IBlogService _blogService;
+
+        public BlogController(IBlogService blogService)
+        {
+            _blogService = blogService;
+        }
         public PartialViewResult Index()
         {
-            return PartialView();
+            var blogs = _blogService.GetAll();
+            return PartialView(blogs);
         }
     }
 }

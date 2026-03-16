@@ -1,4 +1,4 @@
-﻿using Mvc_LifeSure_DbFirst.Models;
+﻿using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Repositories.GenericRepositories;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Mvc_LifeSure_DbFirst.Repositories.TeamRepositories
 {
-    public interface ITeamRepository:IRepository<Teams>
+    public interface ITeamRepository:IRepository<Team>
     {
     }
 }

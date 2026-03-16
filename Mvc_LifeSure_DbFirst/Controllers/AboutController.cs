@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mvc_LifeSure_DbFirst.Services.AboutServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,10 +9,16 @@ namespace Mvc_LifeSure_DbFirst.Controllers
 {
     public class AboutController : Controller
     {
-        // GET: About
+        private readonly IAboutService _aboutService;
+
+        public AboutController(IAboutService aboutService)
+        {
+            _aboutService = aboutService;
+        }
         public PartialViewResult Index()
         {
-            return PartialView();
+            var abouts = _aboutService.GetAll();
+            return PartialView(abouts);
         }
     }
 }

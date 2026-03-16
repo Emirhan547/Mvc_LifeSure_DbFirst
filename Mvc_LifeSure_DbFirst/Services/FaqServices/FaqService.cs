@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Mapster;
+using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Dtos.FaqDtos;
-using Mvc_LifeSure_DbFirst.Models;
 using Mvc_LifeSure_DbFirst.Repositories.FaqRepositories;
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ namespace Mvc_LifeSure_DbFirst.Services.FaqServices
         public void Create(CreateFaqDto create)
         {
             _createValidator.ValidateAndThrow(create);
-            var mappedFaqs = create.Adapt<Faqs>();
+            var mappedFaqs = create.Adapt<Faq>();
             _faqRepository.Create(mappedFaqs);
         }
 

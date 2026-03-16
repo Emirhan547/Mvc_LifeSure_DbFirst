@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using Mapster;
 using Mvc_LifeSure_DbFirst.Dtos.ServiceDtos;
-using Mvc_LifeSure_DbFirst.Models;
 using Mvc_LifeSure_DbFirst.Repositories.ServiceRepositories;
 using System;
 using System.Collections.Generic;
@@ -27,7 +26,7 @@ namespace Mvc_LifeSure_DbFirst.Services.ServiceServices
         public void Create(CreateServicesDto create)
         {
             _createValidator.ValidateAndThrow(create);
-            var mappedService = create.Adapt<Models.Services>();
+            var mappedService = create.Adapt<Data.Entities.Services>();
             _serviceRepository.Create(mappedService);
         }
 

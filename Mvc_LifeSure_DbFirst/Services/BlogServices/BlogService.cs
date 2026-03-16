@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using Mapster;
+using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Dtos.AboutDtos;
 using Mvc_LifeSure_DbFirst.Dtos.BlogDtos;
-using Mvc_LifeSure_DbFirst.Models;
 using Mvc_LifeSure_DbFirst.Repositories.BlogRepositories;
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ namespace Mvc_LifeSure_DbFirst.Services.BlogServices
         public void Create(CreateBlogDto create)
         {
             _createValidator.ValidateAndThrow(create);
-            var mappedBlogs = create.Adapt<Blogs>();
+            var mappedBlogs = create.Adapt<Blog>();
             _blogRepository.Create(mappedBlogs);
         }
 

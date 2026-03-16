@@ -1,4 +1,4 @@
-﻿using Mvc_LifeSure_DbFirst.Models;
+﻿using Mvc_LifeSure_DbFirst.Data.Context;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -10,10 +10,10 @@ namespace Mvc_LifeSure_DbFirst.Repositories.GenericRepositories
 {
     public class GenericRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        protected readonly MvcLifeSureDbEntities _context;
+        protected readonly AppDbContext _context;
         protected readonly DbSet<TEntity> _table;
 
-        public GenericRepository(MvcLifeSureDbEntities context)
+        public GenericRepository(AppDbContext context)
         {
             _context = context;
             _table = _context.Set<TEntity>();

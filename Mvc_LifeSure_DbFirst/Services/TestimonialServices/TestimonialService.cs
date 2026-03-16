@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using Mapster;
+using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Dtos.FeatureDtos;
 using Mvc_LifeSure_DbFirst.Dtos.TestimonialDtos;
-using Mvc_LifeSure_DbFirst.Models;
 using Mvc_LifeSure_DbFirst.Repositories.TestimonialRepositories;
 using System;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace Mvc_LifeSure_DbFirst.Services.TestimonialServices
         public void Create(CreateTestimonialDto create)
         {
             _createValidators.ValidateAndThrow(create);
-            var mappedTestimonials = create.Adapt<Testimonials>();
+            var mappedTestimonials = create.Adapt<Testimonial>();
             _repository.Create(mappedTestimonials);
         }
 

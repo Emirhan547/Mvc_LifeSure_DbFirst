@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Mapster;
+using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Dtos.AboutDtos;
-using Mvc_LifeSure_DbFirst.Models;
 using Mvc_LifeSure_DbFirst.Repositories.AboutRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.GenericRepositories;
 using Newtonsoft.Json.Linq;
@@ -28,7 +28,7 @@ namespace Mvc_LifeSure_DbFirst.Services.AboutServices
         public void Create(CreateAboutDto create)
         {
             _createValidator.ValidateAndThrow(create);
-            var aboutsMapped=create.Adapt<Abouts>();
+            var aboutsMapped=create.Adapt<About>();
             _aboutRepository.Create(aboutsMapped);
            
         }

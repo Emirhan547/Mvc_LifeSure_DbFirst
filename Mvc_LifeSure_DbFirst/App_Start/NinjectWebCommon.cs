@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.Web.Infrastructure.DynamicModuleHelper;
-using Mvc_LifeSure_DbFirst.Models;
+using Mvc_LifeSure_DbFirst.Data.Context;
+
 using Mvc_LifeSure_DbFirst.Repositories.AboutRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.BlogRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.FaqRepositories;
@@ -60,7 +61,7 @@ namespace Mvc_LifeSure_DbFirst.App_Start
         private static void RegisterServices(IKernel kernel)
         {
             // DbContext
-            kernel.Bind<MvcLifeSureDbEntities>()
+            kernel.Bind<AppDbContext>()
                   .ToSelf()
                   .InRequestScope();
 

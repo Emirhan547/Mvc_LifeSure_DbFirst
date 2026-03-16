@@ -1,4 +1,5 @@
-﻿using Mvc_LifeSure_DbFirst.Models;
+﻿using Mvc_LifeSure_DbFirst.Data.Context;
+using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Repositories.GenericRepositories;
 using System;
 using System.Collections.Generic;
@@ -7,9 +8,9 @@ using System.Web;
 
 namespace Mvc_LifeSure_DbFirst.Repositories.TeamRepositories
 {
-    public class TeamRepository : GenericRepository<Teams>, ITeamRepository
+    public class TeamRepository : GenericRepository<Team>, ITeamRepository
     {
-        public TeamRepository(MvcLifeSureDbEntities context) : base(context)
+        public TeamRepository(AppDbContext context) : base(context)
         {
         }
     }
