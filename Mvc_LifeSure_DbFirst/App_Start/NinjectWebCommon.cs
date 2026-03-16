@@ -1,4 +1,5 @@
-﻿using Microsoft.Web.Infrastructure.DynamicModuleHelper;
+﻿using FluentValidation;
+using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using Mvc_LifeSure_DbFirst.Models;
 using Mvc_LifeSure_DbFirst.Repositories.AboutRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.BlogRepositories;
@@ -20,6 +21,8 @@ using Ninject;
 using Ninject.Web.Common;
 using Ninject.Web.Mvc;
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -111,6 +114,23 @@ namespace Mvc_LifeSure_DbFirst.App_Start
 
             kernel.Bind<ITestimonialService>()
               .To<TestimonialService>();
+
+
+            var validators = Assembly.GetExecutingAssembly()
+    .GetTypes()
+    .Where(t => !t.IsAbstract && !t.IsInterface)
+    .SelectMany(t => t.GetInterfaces(),
+        (t, i) => new { Validator = t, Interface = i })
+    .Where(x =>
+        x.Interface.IsGenericType &&
+        x.Interface.GetGenericTypeDefinition() == typeof(IValidator<>));
+
+            foreach (var validator in validators)
+            {
+                kernel.Bind(validator.Interface)
+                      .To(validator.Validator)
+                      .InTransientScope();
+            }
         }
     }
 }
