@@ -1,23 +1,21 @@
-﻿@model IEnumerable<Mvc_LifeSure_DbFirst.Dtos.AboutDtos.ResultAboutDto>
+﻿@model IEnumerable<Mvc_LifeSure_DbFirst.Dtos.SliderDtos.ResultSliderDto>
 @{
-
-    ViewBag.Title = "About Yönetimi";
-    ViewBag.PageTitle = "About Yönetimi";
-    ViewBag.BreadcrumbTitle = "About Listesi";
+    ViewBag.Title = "Slider Yönetimi";
+    ViewBag.PageTitle = "Slider Yönetimi";
+    ViewBag.BreadcrumbTitle = "Slider Listesi";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-
 <div class="p-8 space-y-6">
     <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
-        <h1 class="text-2xl font-bold">About İçerikleri</h1>
+        <h1 class="text-2xl font-bold">Slider İçerikleri</h1>
         <p class="mt-1 text-sm text-white/90">Tüm kayıtları görüntüleyin, güncelleyin veya yeni kayıt ekleyin.</p>
     </div>
 
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-slate-800">About Listesi</h2>
-            <a href="/Admin/About/CreateAbout" class="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-cyan-600 transition-colors">
+            <h2 class="text-lg font-semibold text-slate-800">Slider Listesi</h2>
+            <a href="/Admin/Slider/CreateSlider" class="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-cyan-600 transition-colors">
                 <span class="material-symbols-outlined text-base">add_circle</span>
                 Yeni Kayıt Ekle
             </a>
@@ -27,10 +25,9 @@
             <table class="w-full min-w-[900px] text-sm">
                 <thead class="bg-slate-50 text-slate-700 font-semibold">
                     <tr>
+                        <th class="px-4 py-3 text-left">Üst Başlık</th>
                         <th class="px-4 py-3 text-left">Başlık</th>
-                        <th class="px-4 py-3 text-left">Alt Başlık</th>
-                        <th class="px-4 py-3 text-left">Açıklama 1</th>
-                        <th class="px-4 py-3 text-left">Açıklama 2</th>
+                        <th class="px-4 py-3 text-left">Açıklama</th>
                         <th class="px-4 py-3 text-left">Görsel URL</th>
                         <th class="px-4 py-3 text-right">İşlemler</th>
                     </tr>
@@ -41,15 +38,14 @@
                         foreach (var item in Model)
                         {
                             <tr class="border-t border-slate-100 hover:bg-slate-50/70">
+                                <td class="px-4 py-3 text-slate-600">@item.TopTitle</td>
                                 <td class="px-4 py-3 text-slate-600">@item.Title</td>
-                                <td class="px-4 py-3 text-slate-600">@item.SubTitle</td>
-                                <td class="px-4 py-3 text-slate-600">@item.Description1</td>
-                                <td class="px-4 py-3 text-slate-600">@item.Description2</td>
+                                <td class="px-4 py-3 text-slate-600">@item.Description</td>
                                 <td class="px-4 py-3 text-slate-600">@item.ImageUrl</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-end gap-2">
-                                        <a href="/Admin/About/UpdateAbout/@item.Id" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 font-medium hover:bg-amber-200 transition-colors">Güncelle</a>
-                                        <a href="/Admin/About/DeleteAbout/@item.Id" class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium hover:bg-rose-200 transition-colors" onclick="return confirm('Bu kayıt silinsin mi?');">Sil</a>
+                                        <a href="/Admin/Slider/UpdateSlider/@item.Id" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 font-medium hover:bg-amber-200 transition-colors">Güncelle</a>
+                                        <a href="/Admin/Slider/DeleteSlider/@item.Id" class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium hover:bg-rose-200 transition-colors" onclick="return confirm('Bu kayıt silinsin mi?');">Sil</a>
                                     </div>
                                 </td>
                             </tr>
@@ -58,7 +54,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="6" class="px-4 py-10 text-center text-slate-500">Henüz kayıt bulunmuyor.</td>
+                            <td colspan="5" class="px-4 py-10 text-center text-slate-500">Henüz kayıt bulunmuyor.</td>
                         </tr>
                     }
                 </tbody>

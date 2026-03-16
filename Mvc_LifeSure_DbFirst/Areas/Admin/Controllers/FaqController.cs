@@ -30,16 +30,24 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             _faqService.Delete(id);
             return RedirectToAction(nameof(Index));
         }
+        [HttpGet]
         public ActionResult UpdateFaq(int id)
         {
             var faqs=_faqService.GetById(id);
             return View(faqs);
         }
+        [HttpPost]
         public ActionResult UpdateFaq(UpdateFaqDto updateFaqDto)
         {
             _faqService.Update(updateFaqDto);
             return RedirectToAction(nameof(Index));
         }
+        [HttpGet]
+        public ActionResult CreateFaq()
+        {
+            return View();
+        }
+        [HttpPost]
         public ActionResult CreateFaq (CreateFaqDto createFaqDto)
         {
             _faqService.Create(createFaqDto);

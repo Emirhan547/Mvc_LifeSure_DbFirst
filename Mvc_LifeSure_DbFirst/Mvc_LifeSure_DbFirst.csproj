@@ -342,6 +342,29 @@
     <Content Include="Areas\Admin\Views\web.config" />
     <Content Include="Areas\Admin\Views\Shared\_AdminLayout.cshtml" />
     <Content Include="Areas\Admin\Views\About\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\About\CreateAbout.cshtml" />
+    <Content Include="Areas\Admin\Views\About\UpdateAbout.cshtml" />
+    <Content Include="Areas\Admin\Views\Blog\CreateBlog.cshtml" />
+    <Content Include="Areas\Admin\Views\Blog\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Blog\UpdateBlog.cshtml" />
+    <Content Include="Areas\Admin\Views\Faq\CreateFaq.cshtml" />
+    <Content Include="Areas\Admin\Views\Faq\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Faq\UpdateFaq.cshtml" />
+    <Content Include="Areas\Admin\Views\Feature\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Feature\CreateFeature.cshtml" />
+    <Content Include="Areas\Admin\Views\Feature\UpdateFeature.cshtml" />
+    <Content Include="Areas\Admin\Views\Service\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Service\CreateService.cshtml" />
+    <Content Include="Areas\Admin\Views\Service\UpdateService.cshtml" />
+    <Content Include="Areas\Admin\Views\Slider\CreateSlider.cshtml" />
+    <Content Include="Areas\Admin\Views\Slider\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Slider\UpdateSlider.cshtml" />
+    <Content Include="Areas\Admin\Views\Team\CreateTeam.cshtml" />
+    <Content Include="Areas\Admin\Views\Team\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Team\UpdateTeam.cshtml" />
+    <Content Include="Areas\Admin\Views\Testimonial\CreateTestimonial.cshtml" />
+    <Content Include="Areas\Admin\Views\Testimonial\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Testimonial\UpdateTestimonial.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -524,13 +547,6 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Data\" />
-    <Folder Include="Areas\Admin\Views\Blog\" />
-    <Folder Include="Areas\Admin\Views\Faq\" />
-    <Folder Include="Areas\Admin\Views\Feature\" />
-    <Folder Include="Areas\Admin\Views\Service\" />
-    <Folder Include="Areas\Admin\Views\Slider\" />
-    <Folder Include="Areas\Admin\Views\Team\" />
-    <Folder Include="Areas\Admin\Views\Testimonial\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
