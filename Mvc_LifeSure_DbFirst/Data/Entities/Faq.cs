@@ -12,10 +12,10 @@ namespace Mvc_LifeSure_DbFirst.Data.Entities
         [Key]
         public int Id { get; set; }
 
-        [Required]
+       
         public string Question { get; set; }
 
-        [Required]
+        
         public string Answer { get; set; }
 
         public string ImageUrl { get; set; }

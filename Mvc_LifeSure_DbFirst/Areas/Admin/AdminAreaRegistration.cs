@@ -12,12 +12,13 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin
             }
         }
 
-        public override void RegisterArea(AreaRegistrationContext context) 
+        public override void RegisterArea(AreaRegistrationContext context)
         {
             context.MapRoute(
                 "Admin_default",
                 "Admin/{controller}/{action}/{id}",
-                new { action = "Index", id = UrlParameter.Optional }
+                new { controller = "Dashboard", action = "Index", id = UrlParameter.Optional },
+                new[] { "Mvc_LifeSure_DbFirst.Areas.Admin.Controllers" }
             );
         }
     }

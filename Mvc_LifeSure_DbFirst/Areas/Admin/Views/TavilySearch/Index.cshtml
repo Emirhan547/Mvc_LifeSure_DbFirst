@@ -1,0 +1,356 @@
+﻿@{
+    ViewBag.Title = "Tavily AI Web Arama";
+    ViewBag.PageTitle = "Tavily AI Web Arama";
+    ViewBag.BreadcrumbTitle = "Web Arama";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .search-result {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    .search-result:hover {
+        border-left-color: #0d6efd;
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+    .answer-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .quick-search-btn {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .quick-search-btn:hover {
+        transform: scale(1.05);
+        background-color: #e9ecef;
+    }
+    .typing-indicator {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Arama Kartı -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-search me-2"></i>Tavily AI ile Web Arama
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Tavily AI, güncel web içeriklerini tarayarak size en doğru ve güncel bilgileri sunar.
+                    Sigorta sektörü, güncel haberler, piyasa analizleri ve daha fazlası için kullanabilirsiniz.
+                </p>
+
+                <!-- Arama Formu -->
+                <div class="mb-4">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light border-0">
+                            <i class="fas fa-globe text-primary"></i>
+                        </span>
+                        <input type="text" id="searchQuery" class="form-control border-0 bg-light"
+                               placeholder="Aramak istediğiniz konuyu yazın..."
+                               autocomplete="off">
+                        <select id="maxResults" class="form-select border-0 bg-light" style="max-width: 100px;">
+                            <option value="3">3</option>
+                            <option value="5" selected>5</option>
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                        </select>
+                        <button class="btn btn-primary" type="button" id="searchBtn">
+                            <i class="fas fa-search me-2"></i>Ara
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hızlı Arama Butonları -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted mb-2">
+                        <i class="fas fa-bolt me-2"></i>Hızlı Aramalar:
+                    </label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="sigorta sektörü son dakika haberleri">
+                            <i class="fas fa-newspaper me-1 text-primary"></i>Sigorta Haberleri
+                        </span>
+                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="trafik sigortası fiyatları 2025">
+                            <i class="fas fa-car me-1 text-primary"></i>Trafik Sigortası
+                        </span>
+                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="özel sağlık sigortası kampanyaları">
+                            <i class="fas fa-hospital me-1 text-primary"></i>Sağlık Sigortası
+                        </span>
+                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="konut sigortası zorunlu mu">
+                            <i class="fas fa-home me-1 text-primary"></i>Konut Sigortası
+                        </span>
+                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="dask fiyatları 2025">
+                            <i class="fas fa-house-damage me-1 text-primary"></i>DASK
+                        </span>
+                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="kasko fiyat hesaplama">
+                            <i class="fas fa-shield-alt me-1 text-primary"></i>Kasko
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sonuçlar Kartı -->
+        <div class="card d-none" id="resultsCard">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Arama Sonuçları
+                </h5>
+                <span class="badge bg-light text-dark" id="responseTime"></span>
+            </div>
+            <div class="card-body">
+                <!-- Yükleniyor -->
+                <div class="text-center py-5 d-none" id="loading">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <h6 class="text-muted">Tavily AI web'de arama yapıyor...</h6>
+                </div>
+
+                <!-- Hata Mesajı -->
+                <div class="alert alert-danger d-none" id="errorMessage" role="alert"></div>
+
+                <!-- Cevap Kutusu -->
+                <div class="answer-box mb-4 d-none" id="answerBox">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-robot fa-2x me-3"></i>
+                        <h6 class="mb-0 text-white-50">Tavily AI'nın Cevabı</h6>
+                    </div>
+                    <p class="mb-0 fs-5" id="answer"></p>
+                </div>
+
+                <!-- Arama Sorgusu -->
+                <div class="alert alert-info d-none" id="queryInfo">
+                    <i class="fas fa-info-circle me-2"></i>
+                    "<strong id="searchQueryText"></strong>" için sonuçlar
+                </div>
+
+                <!-- Sonuç Listesi -->
+                <div id="resultsList"></div>
+            </div>
+        </div>
+
+        <!-- Popüler Aramalar -->
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-fire me-2"></i>Popüler Aramalar</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="2025 sigorta trendleri">
+                                <i class="fas fa-chart-line me-2 text-primary"></i>2025 Sigorta Trendleri
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="yapay zeka sigorta sektörü">
+                                <i class="fas fa-brain me-2 text-primary"></i>Yapay Zeka ve Sigorta
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="sigorta dolandırıcılığı önlemleri">
+                                <i class="fas fa-shield me-2 text-primary"></i>Dolandırıcılık Önlemleri
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="en iyi sigorta şirketleri 2025">
+                                <i class="fas fa-trophy me-2 text-primary"></i>En İyi Sigorta Şirketleri
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="sigorta primi hesaplama">
+                                <i class="fas fa-calculator me-2 text-primary"></i>Prim Hesaplama
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="hasar ihbarı nasıl yapılır">
+                                <i class="fas fa-exclamation-triangle me-2 text-primary"></i>Hasar İhbarı
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="trafik sigortası cezaları">
+                                <i class="fas fa-gavel me-2 text-primary"></i>Trafik Sigortası Cezaları
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="tamamlayıcı sağlık sigortası">
+                                <i class="fas fa-heart me-2 text-primary"></i>Tamamlayıcı Sağlık
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="deprem sigortası zorunluluğu">
+                                <i class="fas fa-mountain me-2 text-primary"></i>Deprem Sigortası
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sonuç Şablonu (JavaScript için) -->
+<template id="resultTemplate">
+    <div class="search-result card mb-3">
+        <div class="card-body">
+            <h6 class="card-title">
+                <i class="fas fa-link text-primary me-2"></i>
+                <a href="#" target="_blank" class="text-decoration-none result-title"></a>
+            </h6>
+            <p class="card-text text-muted small result-content"></p>
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted result-url"></small>
+                <span class="badge bg-primary result-score"></span>
+            </div>
+        </div>
+    </div>
+</template>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Arama butonu tıklama
+            $("#searchBtn").click(performSearch);
+
+            // Enter tuşu ile arama
+            $("#searchQuery").keypress(function(e) {
+                if(e.which == 13) {
+                    performSearch();
+                }
+            });
+
+            // Hızlı arama butonları
+            $(".quick-search-btn").click(function() {
+                var query = $(this).data("query");
+                $("#searchQuery").val(query);
+                performSearch();
+            });
+
+            function performSearch() {
+                var query = $("#searchQuery").val().trim();
+                var maxResults = $("#maxResults").val();
+
+                if(query === "") {
+                    alert("Lütfen bir arama sorgusu girin.");
+                    return;
+                }
+
+                // UI'ı temizle ve göster
+                $("#resultsCard").removeClass("d-none");
+                $("#loading").removeClass("d-none");
+                $("#errorMessage").addClass("d-none");
+                $("#answerBox").addClass("d-none");
+                $("#queryInfo").addClass("d-none");
+                $("#resultsList").empty();
+                $("#responseTime").text("");
+
+                // AJAX isteği
+                $.ajax({
+                    url: '@Url.Action("Search", "TavilySearch")',
+                    type: 'POST',
+                    data: {
+                        query: query,
+                        maxResults: maxResults
+                    },
+                    success: function(response) {
+                        $("#loading").addClass("d-none");
+
+                        if(response.success) {
+                            displayResults(response.data, response.query);
+                        } else {
+                            $("#errorMessage")
+                                .removeClass("d-none")
+                                .text(response.message);
+                        }
+                    },
+                    error: function() {
+                        $("#loading").addClass("d-none");
+                        $("#errorMessage")
+                            .removeClass("d-none")
+                            .text("Arama sırasında bir hata oluştu.");
+                    }
+                });
+            }
+
+            function displayResults(data, query) {
+                // Sorgu bilgisi
+                $("#searchQueryText").text(query);
+                $("#queryInfo").removeClass("d-none");
+
+                // Yanıt süresi
+                $("#responseTime").text(`Yanıt süresi: ${data.responseTime.toFixed(2)} s`);
+
+                // Cevap kutusu
+                if(data.answer) {
+                    $("#answer").text(data.answer);
+                    $("#answerBox").removeClass("d-none");
+                }
+
+                // Sonuçlar
+                if(data.results && data.results.length > 0) {
+                    var template = document.getElementById('resultTemplate');
+
+                    data.results.forEach(function(result) {
+                        var clone = template.content.cloneNode(true);
+
+                        // Başlık ve link
+                        $(clone).find('.result-title').text(result.title).attr('href', result.url);
+
+                        // İçerik
+                        var content = result.content;
+                        if(content.length > 200) {
+                            content = content.substring(0, 200) + '...';
+                        }
+                        $(clone).find('.result-content').text(content);
+
+                        // URL
+                        $(clone).find('.result-url').text(result.url);
+
+                        // Skor
+                        var scorePercent = Math.round(result.score * 100);
+                        $(clone).find('.result-score').text(`%${scorePercent} uyumluluk`);
+
+                        $("#resultsList").append(clone);
+                    });
+                } else {
+                    $("#resultsList").html(`
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Sonuç bulunamadı.
+                        </div>
+                    `);
+                }
+            }
+
+            // Sigorta haberlerini getir (opsiyonel)
+            function loadInsuranceNews() {
+                $.ajax({
+                    url: '@Url.Action("SearchInsuranceNews", "TavilySearch")',
+                    type: 'POST',
+                    success: function(response) {
+                        if(response.success) {
+                            // İsteğe bağlı olarak sidebar'da gösterebilirsiniz
+                            console.log(response.data);
+                        }
+                    }
+                });
+            }
+
+            // Sayfa yüklendiğinde otomatik haber getirme (opsiyonel)
+            // loadInsuranceNews();
+        });
+    </script>
+}

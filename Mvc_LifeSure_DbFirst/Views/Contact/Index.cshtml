@@ -1,0 +1,150 @@
+﻿@model Mvc_LifeSure_DbFirst.Dtos.ContactMessageDtos.CreateContactMessageDto
+@{
+    ViewBag.Title = "İletişim";
+    Layout = "~/Views/Shared/_UILayout.cshtml";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header py-5" style="background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://images.unsplash.com/photo-1423666639041-f56000c27a9a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80); background-size: cover; background-position: center;">
+    <div class="container text-center py-5">
+        <h1 class="display-4 text-white mb-4">İletişim</h1>
+        <div class="d-flex justify-content-center">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Default")" class="text-white">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">İletişim</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+<!-- Contact Start -->
+<div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.2s" style="max-width: 800px;">
+            <h4 class="text-primary">İletişim</h4>
+            <h1 class="display-4 mb-4">Bizimle İletişime Geçin</h1>
+            <p class="mb-0">
+                Sorularınız, önerileriniz veya geri bildirimleriniz için bize ulaşın.
+                Size en kısa sürede dönüş yapacağız.
+            </p>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-5">
+            <div class="col-xl-6 wow fadeInLeft" data-wow-delay="0.2s">
+                <div class="contact-img d-flex justify-content-center" style="position: relative;">
+                    <div class="contact-img-inner">
+                        <img src="https://images.unsplash.com/photo-1556742044-3c52d6e88c62?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" class="img-fluid w-100" alt="Contact Us" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    </div>
+                    <div class="contact-experience bg-primary text-white p-4" style="position: absolute; bottom: -20px; left: -20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                        <h3 class="text-white mb-2">25+ Yıl</h3>
+                        <p class="mb-0">Deneyim</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 wow fadeInRight" data-wow-delay="0.4s">
+                <div class="bg-light rounded p-5">
+                    <h3 class="mb-4">Bize Mesaj Gönderin</h3>
+                    @using (Html.BeginForm("SendMessage", "Contact", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control border-0", placeholder = "Adınız", id = "name" })
+                                    @Html.LabelFor(m => m.Name, "Adınız")
+                                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control border-0", placeholder = "Email Adresiniz", id = "email" })
+                                    @Html.LabelFor(m => m.Email, "Email Adresiniz")
+                                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    @Html.TextAreaFor(m => m.Message, new { @class = "form-control border-0", placeholder = "Mesajınız", id = "message", style = "height: 150px;" })
+                                    @Html.LabelFor(m => m.Message, "Mesajınız")
+                                    @Html.ValidationMessageFor(m => m.Message, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary w-100 py-3" type="submit">
+                                    <i class="fas fa-paper-plane me-2"></i>Mesaj Gönder
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-5">
+            <div class="col-lg-4 wow fadeInUp" data-wow-delay="0.2s">
+                <div class="contact-info-item bg-light rounded p-4 text-center">
+                    <div class="contact-info-icon bg-primary text-white rounded-circle mx-auto mb-3" style="width: 70px; height: 70px; line-height: 70px;">
+                        <i class="fas fa-map-marker-alt fa-2x"></i>
+                    </div>
+                    <h4>Adresimiz</h4>
+                    <p class="mb-0">İstanbul, Türkiye</p>
+                </div>
+            </div>
+            <div class="col-lg-4 wow fadeInUp" data-wow-delay="0.4s">
+                <div class="contact-info-item bg-light rounded p-4 text-center">
+                    <div class="contact-info-icon bg-primary text-white rounded-circle mx-auto mb-3" style="width: 70px; height: 70px; line-height: 70px;">
+                        <i class="fas fa-phone-alt fa-2x"></i>
+                    </div>
+                    <h4>Telefon</h4>
+                    <p class="mb-0">+90 (212) 123 45 67</p>
+                </div>
+            </div>
+            <div class="col-lg-4 wow fadeInUp" data-wow-delay="0.6s">
+                <div class="contact-info-item bg-light rounded p-4 text-center">
+                    <div class="contact-info-icon bg-primary text-white rounded-circle mx-auto mb-3" style="width: 70px; height: 70px; line-height: 70px;">
+                        <i class="fas fa-envelope fa-2x"></i>
+                    </div>
+                    <h4>Email</h4>
+                    <p class="mb-0">info@lifesure.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Contact End -->
+<!-- Map Start -->
+<div class="container-fluid map py-5">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="rounded overflow-hidden" style="height: 400px;">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d385398.5898039875!2d28.68254371093751!3d41.004982300000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14caa351dcbd1c35%3A0x2b0b6c8a0a3f0b0!2zxLBzdGFuYnVsLCBUw7xya2l5ZQ!5e0!3m2!1str!2sus!4v1700000000000!5m2!1str!2sus"
+                            width="100%"
+                            height="400"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Map End -->
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+}

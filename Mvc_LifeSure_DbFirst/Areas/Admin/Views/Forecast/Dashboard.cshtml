@@ -1,0 +1,152 @@
+﻿@{
+    ViewBag.Title = "Tahmin Dashboard";
+    ViewBag.PageTitle = "Tahmin Dashboard";
+    ViewBag.BreadcrumbTitle = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>2026 Yılı Çeyreklik Tahminler</h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="quarterlyForecast"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-city me-2"></i>Şehir Bazlı Satış Tahminleri</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="cityChart" style="height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Aylık Trend</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="trendChart" style="height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            loadDashboardData();
+        });
+
+        function loadDashboardData() {
+            $.ajax({
+                url: '@Url.Action("GetDashboardData")',
+                type: 'POST',
+                success: function(response) {
+                    if(response.success) {
+                        displayQuarterlyForecast(response.yearly);
+                        displayCityChart(response.forecasts);
+                        displayTrendChart(response.forecasts);
+                    }
+                }
+            });
+        }
+
+        function displayQuarterlyForecast(data) {
+            var html = '';
+            var cities = [...new Set(data.map(item => item.city))];
+
+            cities.forEach(city => {
+                var cityData = data.filter(d => d.city === city);
+                html += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">${city}</h6>
+                            </div>
+                            <div class="card-body p-2">
+                `;
+
+                cityData.forEach(q => {
+                    html += `
+                        <div class="mb-2 p-2 border-bottom">
+                            <small class="text-muted">${q.year} Q${q.quarter}</small>
+                            <div class="d-flex justify-content-between">
+                                <span>${Math.round(q.predictedTotalSales)} poliçe</span>
+                                <span class="text-primary">${Math.round(q.predictedTotalPremium / 1000)}K ₺</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div></div>`;
+            });
+
+            $("#quarterlyForecast").html(html);
+        }
+
+        function displayCityChart(forecasts) {
+            var cities = Object.keys(forecasts);
+            var totalSales = cities.map(city =>
+                forecasts[city].reduce((sum, item) => sum + item.predictedSales, 0)
+            );
+
+            new Chart(document.getElementById('cityChart'), {
+                type: 'bar',
+                data: {
+                    labels: cities,
+                    datasets: [{
+                        label: 'Tahmini Toplam Satış',
+                        data: totalSales,
+                        backgroundColor: '#0d6efd'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function displayTrendChart(forecasts) {
+            var cities = Object.keys(forecasts).slice(0, 5); // İlk 5 şehir
+            var datasets = [];
+            var months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran'];
+
+            cities.forEach((city, index) => {
+                var cityData = forecasts[city];
+                datasets.push({
+                    label: city,
+                    data: cityData.map(d => d.predictedSales),
+                    borderColor: `hsl(${index * 70}, 70%, 50%)`,
+                    tension: 0.4
+                });
+            });
+
+            new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    </script>
+}

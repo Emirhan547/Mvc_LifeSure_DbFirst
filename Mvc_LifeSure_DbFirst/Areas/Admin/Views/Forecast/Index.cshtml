@@ -1,0 +1,395 @@
+﻿@{
+    ViewBag.Title = "Poliçe Satış Tahminleme";
+    ViewBag.PageTitle = "Poliçe Satış Tahminleme";
+    ViewBag.BreadcrumbTitle = "ML Tahmin";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .forecast-card {
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+        .forecast-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+    .confidence-interval {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .metric-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .metric-box-sm {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+    }
+</style>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Kontrol Kartı -->
+        <div class="card forecast-card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Tahmin Parametreleri
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Şehir Seçin</label>
+                        <select id="citySelect" class="form-select">
+                            <option value="">-- Şehir Seçin --</option>
+                            @foreach (var city in ViewBag.Cities)
+                            {
+                                <option value="@city">@city</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Tahmin Süresi (Ay)</label>
+                        <select id="monthsSelect" class="form-select">
+                            <option value="3">3 Ay</option>
+                            <option value="6" selected>6 Ay</option>
+                            <option value="12">12 Ay</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" id="forecastBtn">
+                            <i class="fas fa-magic me-2"></i>Tahmin Yap
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-info w-100" id="trainModelBtn">
+                            <i class="fas fa-brain me-2"></i>Model Eğit
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-success w-100" id="validateBtn">
+                            <i class="fas fa-check-circle me-2"></i>Doğruluk Testi
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-warning w-100" id="exportBtn">
+                            <i class="fas fa-download me-2"></i>CSV İndir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sonuç Kartı -->
+        <div class="card forecast-card d-none" id="resultCard">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Tahmin Sonuçları
+                </h5>
+                <span class="badge bg-light text-dark" id="cityName"></span>
+            </div>
+            <div class="card-body">
+                <!-- Yükleniyor -->
+                <div class="text-center py-5 d-none" id="loading">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <h6 class="text-muted">ML model tahmin yapıyor...</h6>
+                </div>
+
+                <!-- Hata Mesajı -->
+                <div class="alert alert-danger d-none" id="errorMessage"></div>
+
+                <!-- Metrikler -->
+                <div class="row mb-4" id="metricsRow"></div>
+
+                <!-- Grafik -->
+                <canvas id="forecastChart" style="height: 300px; width: 100%;"></canvas>
+
+                <!-- Tablo -->
+                <div class="table-responsive mt-4">
+                    <table class="table table-hover" id="forecastTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Dönem</th>
+                                <th>Tahmini Satış</th>
+                                <th>Tahmini Prim</th>
+                                <th>Alt Limit</th>
+                                <th>Üst Limit</th>
+                                <th>Güven Aralığı</th>
+                            </tr>
+                        </thead>
+                        <tbody id="forecastTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template for metric -->
+<template id="metricTemplate">
+    <div class="col-md-3 mb-3">
+        <div class="metric-box-sm">
+            <h6 class="text-muted mb-2 metric-title"></h6>
+            <h4 class="mb-0 metric-value"></h4>
+            <small class="text-muted metric-sub"></small>
+        </div>
+    </div>
+</template>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            var chart = null;
+
+            // Tahmin butonu
+            $("#forecastBtn").click(function() {
+                var city = $("#citySelect").val();
+                var months = $("#monthsSelect").val();
+
+                if(!city) {
+                    alert("Lütfen bir şehir seçin.");
+                    return;
+                }
+
+                getForecast(city, months);
+            });
+
+            // Model eğit butonu
+            $("#trainModelBtn").click(function() {
+                var city = $("#citySelect").val();
+                if(!city) {
+                    alert("Lütfen bir şehir seçin.");
+                    return;
+                }
+
+                if(confirm(city + " için ML model eğitmek istediğinize emin misiniz?")) {
+                    trainModel(city);
+                }
+            });
+
+            // Doğrulama butonu
+            $("#validateBtn").click(function() {
+                var city = $("#citySelect").val();
+                if(!city) {
+                    alert("Lütfen bir şehir seçin.");
+                    return;
+                }
+
+                validateForecast(city);
+            });
+
+            // Export butonu
+            $("#exportBtn").click(function() {
+                var city = $("#citySelect").val();
+                var months = $("#monthsSelect").val();
+
+                if(!city) {
+                    alert("Lütfen bir şehir seçin.");
+                    return;
+                }
+
+                window.location.href = '@Url.Action("ExportForecast")?city=' + city + '&months=' + months;
+            });
+
+            function getForecast(city, months) {
+                $("#resultCard").removeClass("d-none");
+                $("#loading").removeClass("d-none");
+                $("#errorMessage").addClass("d-none");
+                $("#forecastTableBody").empty();
+                $("#metricsRow").empty();
+                $("#cityName").text(city);
+
+                $.ajax({
+                    url: '@Url.Action("GetForecast")',
+                    type: 'POST',
+                    data: { city: city, months: months },
+                    success: function(response) {
+                        $("#loading").addClass("d-none");
+
+                        if(response.success) {
+                            displayForecast(response.data);
+                        } else {
+                            $("#errorMessage")
+                                .removeClass("d-none")
+                                .text(response.message);
+                        }
+                    },
+                    error: function() {
+                        $("#loading").addClass("d-none");
+                        $("#errorMessage")
+                            .removeClass("d-none")
+                            .text("Tahmin yapılırken bir hata oluştu.");
+                    }
+                });
+            }
+
+            function displayForecast(data) {
+                // Metrikleri hesapla
+                var totalSales = data.reduce((sum, item) => sum + item.predictedSales, 0);
+                var totalPremium = data.reduce((sum, item) => sum + item.predictedPremium, 0);
+                var avgSales = totalSales / data.length;
+                var avgPremium = totalPremium / data.length;
+
+                // Metrikleri göster
+                var metricTemplate = document.getElementById('metricTemplate');
+
+                var metrics = [
+                    { title: 'Toplam Satış', value: Math.round(totalSales), sub: 'adet' },
+                    { title: 'Toplam Prim', value: Math.round(totalPremium).toLocaleString() + ' ₺', sub: 'tutar' },
+                    { title: 'Ort. Satış', value: Math.round(avgSales), sub: 'adet/ay' },
+                    { title: 'Ort. Prim', value: Math.round(avgPremium).toLocaleString() + ' ₺', sub: 'aylık' }
+                ];
+
+                metrics.forEach(metric => {
+                    var clone = metricTemplate.content.cloneNode(true);
+                    $(clone).find('.metric-title').text(metric.title);
+                    $(clone).find('.metric-value').text(metric.value);
+                    $(clone).find('.metric-sub').text(metric.sub);
+                    $("#metricsRow").append(clone);
+                });
+
+                // Tabloyu doldur
+                var tableHtml = '';
+                data.forEach(item => {
+                    var confidenceRange = Math.round(item.confidenceUpper - item.confidenceLower);
+                    tableHtml += `
+                        <tr>
+                            <td><strong>${item.period}</strong></td>
+                            <td>${Math.round(item.predictedSales)} adet</td>
+                            <td>${Math.round(item.predictedPremium).toLocaleString()} ₺</td>
+                            <td>${Math.round(item.confidenceLower)} adet</td>
+                            <td>${Math.round(item.confidenceUpper)} adet</td>
+                            <td>±${Math.round(confidenceRange/2)} adet</td>
+                        </tr>
+                    `;
+                });
+                $("#forecastTableBody").html(tableHtml);
+
+                // Grafik
+                var ctx = document.getElementById('forecastChart').getContext('2d');
+
+                if(chart) {
+                    chart.destroy();
+                }
+
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(item => item.period),
+                        datasets: [
+                            {
+                                label: 'Tahmini Satış',
+                                data: data.map(item => item.predictedSales),
+                                borderColor: 'rgb(13, 110, 253)',
+                                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                                tension: 0.4,
+                                fill: false
+                            },
+                            {
+                                label: 'Alt Limit',
+                                data: data.map(item => item.confidenceLower),
+                                borderColor: 'rgba(220, 53, 69, 0.5)',
+                                borderDash: [5, 5],
+                                fill: false,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Üst Limit',
+                                data: data.map(item => item.confidenceUpper),
+                                borderColor: 'rgba(25, 135, 84, 0.5)',
+                                borderDash: [5, 5],
+                                fill: false,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + Math.round(context.raw) + ' adet';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + ' adet';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function trainModel(city) {
+                $("#loading").removeClass("d-none");
+
+                $.ajax({
+                    url: '@Url.Action("TrainModel")',
+                    type: 'POST',
+                    data: { city: city },
+                    success: function(response) {
+                        $("#loading").addClass("d-none");
+
+                        if(response.success) {
+                            var result = response.data;
+                            var message = `
+                                Model Eğitildi!
+                                R² Skoru: ${result.rScore.toFixed(3)}
+                                Ortalama Hata: ${result.meanAbsoluteError.toFixed(2)} adet
+                                Veri Sayısı: ${result.dataPointCount}
+                            `;
+                            alert(message);
+                        } else {
+                            alert("Hata: " + response.message);
+                        }
+                    },
+                    error: function() {
+                        $("#loading").addClass("d-none");
+                        alert("Model eğitilirken hata oluştu.");
+                    }
+                });
+            }
+
+            function validateForecast(city) {
+                $.ajax({
+                    url: '@Url.Action("ValidateForecast")',
+                    type: 'POST',
+                    data: { city: city },
+                    success: function(response) {
+                        if(response.success) {
+                            alert(`${city} için tahmin doğruluğu: %${response.accuracy}`);
+                        } else {
+                            alert("Hata: " + response.message);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

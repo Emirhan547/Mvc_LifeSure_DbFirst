@@ -1,0 +1,153 @@
+﻿@model IEnumerable<Mvc_LifeSure_DbFirst.Dtos.AppUserDtos.ResultAppUserDto>
+@{
+    ViewBag.Title = "Kullanıcı Yönetimi";
+    ViewBag.PageTitle = "Kullanıcı Yönetimi";
+    ViewBag.BreadcrumbTitle = "Kullanıcı Listesi";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Kullanıcılar</h5>
+        <div>
+            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Kullanıcı ara..." style="width: 250px;">
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="userTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Kullanıcı Adı</th>
+                        <th>Email</th>
+                        <th>Şehir</th>
+                        <th>Poliçe Sayısı</th>
+                        <th>Durum</th>
+                        <th>Kayıt Tarihi</th>
+                        <th class="text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.FirstName @user.LastName</td>
+                                <td>@user.UserName</td>
+                                <td>@user.Email</td>
+                                <td>@(user.City ?? "-")</td>
+                                <td>@user.PolicyCount</td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge bg-success">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Pasif</span>
+                                    }
+                                </td>
+                                <td>@user.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                <td class="text-end">
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("Details", new { id = user.Id })" class="btn btn-sm btn-info" title="Detay">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", new { id = user.Id })" class="btn btn-sm btn-warning" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("ManageRoles", new { id = user.Id })" class="btn btn-sm btn-primary" title="Roller">
+                                            <i class="fas fa-tags"></i>
+                                        </a>
+                                        <button class="btn btn-sm @(user.IsActive ? "btn-secondary" : "btn-success") toggle-status"
+                                                data-user-id="@user.Id"
+                                                data-status="@user.IsActive"
+                                                title="@(user.IsActive ? "Pasif Yap" : "Aktif Yap")">
+                                            <i class="fas @(user.IsActive ? "fa-ban" : "fa-check-circle")"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-user" data-user-id="@user.Id" title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                Henüz kullanıcı kaydı bulunmuyor.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Arama
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#userTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // Durum değiştirme
+            $(".toggle-status").click(function() {
+                var button = $(this);
+                var userId = button.data("user-id");
+                var isActive = button.data("status");
+
+                if (confirm(isActive ? "Kullanıcıyı pasif yapmak istediğinize emin misiniz?" : "Kullanıcıyı aktif yapmak istediğinize emin misiniz?")) {
+                    $.ajax({
+                        url: '@Url.Action("ToggleStatus", "UserManagement")',
+                        type: 'POST',
+                        data: { id: userId },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function() {
+                            alert("Bir hata oluştu.");
+                        }
+                    });
+                }
+            });
+
+            // Silme
+            $(".delete-user").click(function() {
+                var button = $(this);
+                var userId = button.data("user-id");
+
+                if (confirm("Bu kullanıcıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "UserManagement")',
+                        type: 'POST',
+                        data: { id: userId },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function() {
+                            alert("Bir hata oluştu.");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

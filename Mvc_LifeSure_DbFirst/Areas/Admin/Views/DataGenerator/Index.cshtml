@@ -1,0 +1,188 @@
+﻿@{
+    ViewBag.Title = "Veri Oluşturucu";
+    ViewBag.PageTitle = "Veri Oluşturucu";
+    ViewBag.BreadcrumbTitle = "Veri Oluşturma";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Gemini AI ile Veri Oluşturma</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Gemini AI kullanarak 1500+ poliçe verisi oluşturabilirsiniz.
+                    Oluşturulan veriler analiz ve tahminleme işlemleri için kullanılacaktır.
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded text-center">
+                            <h6 class="text-muted mb-2">Toplam Poliçe Sayısı</h6>
+                            <h2 class="text-primary mb-0">@ViewBag.TotalPolicies</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded text-center">
+                            <h6 class="text-muted mb-2">Toplam Prim Tutarı</h6>
+                            <h2 class="text-success mb-0">@ViewBag.TotalPremium.ToString("C0")</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="generateForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Oluşturulacak Poliçe Sayısı</label>
+                        <input type="number" id="policyCount" class="form-control" value="1500" min="100" max="5000" step="100">
+                        <small class="text-muted">Minimum 100, maksimum 5000 poliçe oluşturabilirsiniz.</small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" id="generateBtn">
+                            <i class="fas fa-magic me-2"></i>Verileri Oluştur
+                        </button>
+                        <a href="@Url.Action("ViewData")" class="btn btn-info">
+                            <i class="fas fa-eye me-2"></i>Verileri Görüntüle
+                        </a>
+                        <button type="button" class="btn btn-danger" id="clearBtn">
+                            <i class="fas fa-trash me-2"></i>Tüm Verileri Sil
+                        </button>
+                    </div>
+                </form>
+
+                <div class="progress mt-4 d-none" id="progressBar">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                         role="progressbar"
+                         style="width: 0%"
+                         id="progress">
+                        0%
+                    </div>
+                </div>
+
+                <div class="alert mt-4 d-none" id="resultMessage" role="alert"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Veri Dağılımı</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="distributionChart" style="height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Form submit
+            $("#generateForm").submit(function(e) {
+                e.preventDefault();
+
+                var count = $("#policyCount").val();
+                if (!confirm(count + " adet poliçe verisi oluşturmak istediğinize emin misiniz? Bu işlem birkaç dakika sürebilir.")) {
+                    return;
+                }
+
+                $("#generateBtn").prop("disabled", true);
+                $("#progressBar").removeClass("d-none");
+                $("#resultMessage").addClass("d-none");
+
+                // Progress bar animasyonu
+                var progress = 0;
+                var interval = setInterval(function() {
+                    progress += 2;
+                    if (progress <= 90) {
+                        $("#progress").css("width", progress + "%").text(progress + "%");
+                    }
+                }, 100);
+
+                $.ajax({
+                    url: '@Url.Action("GeneratePolicies")',
+                    type: 'POST',
+                    data: { count: count },
+                    success: function(response) {
+                        clearInterval(interval);
+                        $("#progress").css("width", "100%").text("100%");
+
+                        if (response.success) {
+                            $("#resultMessage")
+                                .removeClass("d-none alert-danger")
+                                .addClass("alert-success")
+                                .html('<i class="fas fa-check-circle me-2"></i>' + response.message);
+
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            $("#progressBar").addClass("d-none");
+                            $("#resultMessage")
+                                .removeClass("d-none alert-success")
+                                .addClass("alert-danger")
+                                .html('<i class="fas fa-exclamation-circle me-2"></i>' + response.message);
+                            $("#generateBtn").prop("disabled", false);
+                        }
+                    },
+                    error: function() {
+                        clearInterval(interval);
+                        $("#progressBar").addClass("d-none");
+                        $("#resultMessage")
+                            .removeClass("d-none")
+                            .addClass("alert-danger")
+                            .html('<i class="fas fa-exclamation-circle me-2"></i>Bir hata oluştu.');
+                        $("#generateBtn").prop("disabled", false);
+                    }
+                });
+            });
+
+            // Tüm verileri sil
+            $("#clearBtn").click(function() {
+                if (!confirm("Tüm verileri silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("ClearAllData")',
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                });
+            });
+
+            // Dağılım grafiği
+            var ctx = document.getElementById('distributionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                    datasets: [{
+                        label: 'Poliçe Sayısı',
+                        data: @Html.Raw(Json.Encode(Enumerable.Range(1, 12).Select(x => 0))),
+                        backgroundColor: '#0d6efd'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

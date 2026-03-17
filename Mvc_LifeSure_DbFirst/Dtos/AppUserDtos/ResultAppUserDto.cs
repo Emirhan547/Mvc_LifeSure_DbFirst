@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace Mvc_LifeSure_DbFirst.Dtos.AppUserDtos
+{
+    public class ResultAppUserDto
+    {
+        public string Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string UserName { get; set; }
+        public string City { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public bool IsActive { get; set; }
+        public string PhoneNumber { get; set; }
+        public int PolicyCount { get; set; }
+    }
+}

@@ -1,19 +1,36 @@
 ﻿using FluentValidation;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.Owin.Security;
 using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using Mvc_LifeSure_DbFirst.Data.Context;
-
+using Mvc_LifeSure_DbFirst.Data.Entities;
+using Mvc_LifeSure_DbFirst.Data.Identity;
 using Mvc_LifeSure_DbFirst.Repositories.AboutRepositories;
+using Mvc_LifeSure_DbFirst.Repositories.AdminLogRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.BlogRepositories;
+using Mvc_LifeSure_DbFirst.Repositories.ContactMessageRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.FaqRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.FeatureRepositories;
+using Mvc_LifeSure_DbFirst.Repositories.InsurancePackageRepositories;
+using Mvc_LifeSure_DbFirst.Repositories.PolicyRepositories;
+using Mvc_LifeSure_DbFirst.Repositories.PolicySaleDataRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.ServiceRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.SliderRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.TeamRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.TestimonialRepositories;
 using Mvc_LifeSure_DbFirst.Services.AboutServices;
+using Mvc_LifeSure_DbFirst.Services.AdminLogServices;
+using Mvc_LifeSure_DbFirst.Services.AIServices;
+using Mvc_LifeSure_DbFirst.Services.AppUserServices;
 using Mvc_LifeSure_DbFirst.Services.BlogServices;
+using Mvc_LifeSure_DbFirst.Services.ContactMessageServices;
 using Mvc_LifeSure_DbFirst.Services.FaqServices;
 using Mvc_LifeSure_DbFirst.Services.FeatureServices;
+using Mvc_LifeSure_DbFirst.Services.InsurancePackageServices;
+using Mvc_LifeSure_DbFirst.Services.MLServices;
+using Mvc_LifeSure_DbFirst.Services.PolicySaleDataServices;
+using Mvc_LifeSure_DbFirst.Services.PolicyServices;
 using Mvc_LifeSure_DbFirst.Services.ServiceServices;
 using Mvc_LifeSure_DbFirst.Services.SliderServices;
 using Mvc_LifeSure_DbFirst.Services.TeamServices;
@@ -91,6 +108,12 @@ namespace Mvc_LifeSure_DbFirst.App_Start
             kernel.Bind<ITestimonialRepository>()
                   .To<TestimonialRepository>();
 
+            kernel.Bind<IInsurancePackageRepository>().To<InsurancePackageRepository>();
+            kernel.Bind<IPolicyRepository>().To<PolicyRepository>();
+            kernel.Bind<IContactMessageRepository>().To<ContactMessageRepository>();
+            kernel.Bind<IAdminLogRepository>().To<AdminLogRepository>();
+            kernel.Bind<IPolicySaleDataRepository>().To<PolicySaleDataRepository>();
+
             //Services
             kernel.Bind<IAboutService>()
                  .To<AboutService>();
@@ -109,13 +132,40 @@ namespace Mvc_LifeSure_DbFirst.App_Start
 
             kernel.Bind<ISliderService>()
                .To<SliderService>();
-
+            kernel.Bind<IForecastService>().To<ForecastService>().InRequestScope();
             kernel.Bind<ITeamService>()
                .To<TeamService>();
-
+            kernel.Bind<IHuggingFaceService>().To<HuggingFaceService>().InRequestScope();
+            kernel.Bind<IChatGPTService>().To<ChatGPTService>().InRequestScope();
+            kernel.Bind<IMailService>().To<MailService>().InRequestScope();
             kernel.Bind<ITestimonialService>()
               .To<TestimonialService>();
+            kernel.Bind<IAppUserService>().To<AppUserService>();
+            kernel.Bind<IInsurancePackageService>().To<InsurancePackageService>();
+            kernel.Bind<IPolicyService>().To<PolicyService>();
+            kernel.Bind<IContactMessageService>().To<ContactMessageService>();
+            kernel.Bind<IAdminLogService>().To<AdminLogService>();
+            kernel.Bind<IHuggingFaceService>().To<HuggingFaceService>().InRequestScope();
+            kernel.Bind<IChatGPTService>().To<ChatGPTService>().InRequestScope();
+            kernel.Bind<IMailService>().To<MailService>().InRequestScope();
+            kernel.Bind<IGeminiService>().To<GeminiService>().InRequestScope(); // YENİ
 
+            // PolicySaleData
+            kernel.Bind<IPolicySaleDataRepository>().To<PolicySaleDataRepository>(); // YENİ
+            kernel.Bind<IPolicySaleDataService>().To<PolicySaleDataService>();
+            // Identity için gerekli
+            kernel.Bind<UserManager<AppUser, string>>().ToMethod(context =>
+            {
+                var userStore = new UserStore<AppUser, AppRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>(context.Kernel.Get<AppDbContext>());
+                return new UserManager<AppUser, string>(userStore);
+            }).InRequestScope();
+            // Identity servisleri
+            kernel.Bind<IUserStore<AppUser>>().To<UserStore<AppUser>>().InRequestScope();
+            kernel.Bind<IRoleStore<AppRole, string>>().To<RoleStore<AppRole>>().InRequestScope();
+            kernel.Bind<AppUserManager>().ToSelf().InRequestScope();
+            kernel.Bind<AppSignInManager>().ToSelf().InRequestScope();
+            kernel.Bind<IAuthenticationManager>().ToMethod(context =>
+                HttpContext.Current.GetOwinContext().Authentication).InRequestScope();
 
             var validators = Assembly.GetExecutingAssembly()
     .GetTypes()
