@@ -89,27 +89,26 @@
                     <span class="fa fa-bars"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
-                    <div class="navbar-nav mx-0 mx-lg-auto">
-                        <a href="index.html" class="nav-item nav-link active">Home</a>
-                        <a href="about.html" class="nav-item nav-link">About</a>
-                        <a href="service.html" class="nav-item nav-link">Services</a>
-                        <a href="blog.html" class="nav-item nav-link">Blog</a>
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link" data-bs-toggle="dropdown">
-                                <span class="dropdown-toggle">Pages</span>
-                            </a>
-                            <div class="dropdown-menu">
-                                <a href="feature.html" class="dropdown-item">Our Features</a>
-                                <a href="team.html" class="dropdown-item">Our team</a>
-                                <a href="testimonial.html" class="dropdown-item">Testimonial</a>
-                                <a href="FAQ.html" class="dropdown-item">FAQs</a>
-                                <a href="404.html" class="dropdown-item">404 Page</a>
-                            </div>
-                        </div>
-                        <a href="contact.html" class="nav-item nav-link">Contact</a>
-                        <div class="nav-btn px-3">
+                    <div class="navbar-nav mx-0 mx-lg-auto align-items-lg-center">
+                        <a href='@Url.Action("Index", "Default")' class="nav-item nav-link active">Anasayfa</a>
+                        <a href='@Url.Action("Index", "Contact")' class="nav-item nav-link">İletişim</a>
+                        <div class="nav-btn px-3 d-flex align-items-center gap-2">
                             <button class="btn-search btn btn-primary btn-md-square rounded-circle flex-shrink-0" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fas fa-search"></i></button>
-                            <a href="#" class="btn btn-primary rounded-pill py-2 px-4 ms-3 flex-shrink-0"> Get a Quote</a>
+                            @if (Request.IsAuthenticated)
+                            {
+                                <a href='@Url.Action("Profile", "Account")' class="btn btn-light rounded-pill py-2 px-4 ms-1 flex-shrink-0">Profilim</a>
+                                using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "d-inline" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-primary rounded-pill py-2 px-4 ms-1 flex-shrink-0">Çıkış Yap</button>
+                                }
+                            }
+                            else
+                            {
+                                <a href='@Url.Action("Login", "Account")' class="btn btn-primary rounded-pill py-2 px-4 ms-1 flex-shrink-0">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,56 @@
+﻿@model IEnumerable<Mvc_LifeSure_DbFirst.Dtos.InsurancePackageDtos.ResultInsurancePackageDto>
+@{
+    ViewBag.Title = "Paket Yönetimi";
+    ViewBag.PageTitle = "Paket Yönetimi";
+    ViewBag.BreadcrumbTitle = "Paketler";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="p-8 space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-semibold">Sigorta Paketleri</h2>
+        <a href="@Url.Action("Create")" class="px-4 py-2 rounded-xl bg-primary text-white">Yeni Paket</a>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-800 text-left">
+                <tr>
+                    <th class="px-4 py-3">Paket</th>
+                    <th class="px-4 py-3">Fiyat</th>
+                    <th class="px-4 py-3">Süre</th>
+                    <th class="px-4 py-3">Durum</th>
+                    <th class="px-4 py-3 text-right">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="border-t border-slate-100 dark:border-slate-800">
+                        <td class="px-4 py-3">@item.PackageName</td>
+                        <td class="px-4 py-3">@item.BasePrice.ToString("C")</td>
+                        <td class="px-4 py-3">@item.CoveragePeriodMonths Ay</td>
+                        <td class="px-4 py-3">@(item.IsActive ? "Aktif" : "Pasif")</td>
+                        <td class="px-4 py-3">
+                            <div class="flex justify-end gap-2">
+                                <a href="@Url.Action("Details", new { id = item.Id })" class="px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700">Detay</a>
+                                <a href="@Url.Action("Edit", new { id = item.Id })" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700">Düzenle</a>
+                                <button class="px-3 py-1.5 rounded-lg bg-violet-100 text-violet-700 toggle-btn" data-id="@item.Id">Durum</button>
+                                <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 delete-btn" data-id="@item.Id">Sil</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+$(function(){
+    $('.toggle-btn').click(function(){ $.post('@Url.Action("ToggleStatus")',{id:$(this).data('id')},function(r){ if(r.success) location.reload(); else alert(r.message||'Hata');});});
+    $('.delete-btn').click(function(){ if(!confirm('Paket silinsin mi?')) return; $.post('@Url.Action("Delete")',{id:$(this).data('id')},function(r){ if(r.success) location.reload(); else alert(r.message||'Hata');});});
+});
+    </script>
+}

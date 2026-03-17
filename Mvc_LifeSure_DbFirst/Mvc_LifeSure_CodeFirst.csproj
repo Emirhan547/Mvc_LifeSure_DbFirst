@@ -462,12 +462,6 @@
     <Compile Include="Validators\TeamValidators\UpdateTeamValidator.cs" />
     <Compile Include="Validators\TestimonialValidators\CreateTestimonialValidator.cs" />
     <Compile Include="Validators\TestimonialValidators\UpdateTestimonialValidator.cs" />
-    <Compile Include="ViewModels\AccountViewModels.cs" />
-    <Compile Include="ViewModels\ChangePasswordViewModel.cs" />
-    <Compile Include="ViewModels\ForgotPasswordViewModel.cs" />
-    <Compile Include="ViewModels\ProfileViewModel.cs" />
-    <Compile Include="ViewModels\RegisterViewModel.cs" />
-    <Compile Include="ViewModels\ResetPasswordViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -528,6 +522,20 @@
     <Content Include="Areas\Admin\Views\TavilySearch\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Forecast\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Forecast\Dashboard.cshtml" />
+    <Content Include="Areas\Admin\Views\ContactMessage\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\ContactMessage\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\PackageManagement\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\PackageManagement\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\PackageManagement\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\PackageManagement\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\PolicyManagement\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\PolicyManagement\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\PolicyManagement\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\PolicyManagement\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\PolicyManagement\UserPolicies.cshtml" />
+    <Content Include="Areas\Admin\Views\UserManagement\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\UserManagement\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\UserManagement\ManageRoles.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -708,17 +716,13 @@
     <Content Include="Views\Slider\Index.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Register.cshtml" />
-    <Content Include="Views\Account\Profile.cshtml" />
-    <Content Include="Views\Account\ChangePassword.cshtml" />
     <Content Include="Views\Contact\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Admin\Views\AdminBase\" />
-    <Folder Include="Areas\Admin\Views\ContactMessage\" />
-    <Folder Include="Areas\Admin\Views\PackageManagement\" />
-    <Folder Include="Areas\Admin\Views\PolicyManagement\" />
+    <Folder Include="ViewModels\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

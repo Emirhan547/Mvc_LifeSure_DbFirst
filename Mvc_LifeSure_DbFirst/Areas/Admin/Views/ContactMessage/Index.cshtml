@@ -1,0 +1,100 @@
+﻿@model IEnumerable<Mvc_LifeSure_DbFirst.Dtos.ContactMessageDtos.ResultContactMessageDto>
+@{
+    ViewBag.Title = "İletişim Mesajları";
+    ViewBag.PageTitle = "İletişim Mesajları";
+    ViewBag.BreadcrumbTitle = "Mesaj Listesi";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var stats = ViewBag.Stats as Dictionary<string, int>;
+}
+
+<div class="p-8 space-y-6">
+    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6">
+        <h3 class="text-lg font-semibold mb-4">Mesaj İstatistikleri</h3>
+        @if (stats != null && stats.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                @foreach (var item in stats)
+                {
+                    <div class="rounded-xl bg-slate-50 dark:bg-slate-800 px-4 py-3 flex justify-between">
+                        <span>@item.Key</span><strong>@item.Value</strong>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-slate-500">İstatistik bulunamadı.</p>
+        }
+    </div>
+
+    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Gelen Mesajlar</h2>
+            <a href="@Url.Action("Unreplied")" class="px-4 py-2 rounded-xl bg-primary text-white text-sm">Sadece Cevaplanmayanlar</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[900px] text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800 text-left">
+                    <tr>
+                        <th class="px-4 py-3">Gönderen</th>
+                        <th class="px-4 py-3">Email</th>
+                        <th class="px-4 py-3">Kategori</th>
+                        <th class="px-4 py-3">Durum</th>
+                        <th class="px-4 py-3">Tarih</th>
+                        <th class="px-4 py-3 text-right">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr class="border-t border-slate-100 dark:border-slate-800">
+                                <td class="px-4 py-3">@item.Name</td>
+                                <td class="px-4 py-3">@item.Email</td>
+                                <td class="px-4 py-3">@(string.IsNullOrWhiteSpace(item.Category) ? "-" : item.Category)</td>
+                                <td class="px-4 py-3">
+                                    @if (item.IsReplied)
+                                    {<span class="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700">Cevaplandı</span> }
+                                    else
+                                    { <span class="px-2 py-1 rounded-lg bg-amber-100 text-amber-700">Bekliyor</span>}
+                                </td>
+                                <td class="px-4 py-3">@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex justify-end gap-2">
+                                        <a href="@Url.Action("Details", new { id = item.Id })" class="px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700">Detay</a>
+                                        <button class="px-3 py-1.5 rounded-lg bg-violet-100 text-violet-700 reprocess-btn" data-id="@item.Id">Yeniden İşle</button>
+                                        <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 delete-btn" data-id="@item.Id">Sil</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Mesaj bulunamadı.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    $(function () {
+        $('.delete-btn').click(function () {
+            if (!confirm('Mesaj silinsin mi?')) return;
+            $.post('@Url.Action("Delete")', { id: $(this).data('id') }, function (res) {
+                if (res.success) location.reload(); else alert(res.message || 'Hata oluştu');
+            });
+        });
+
+        $('.reprocess-btn').click(function () {
+            $.post('@Url.Action("Reprocess")', { id: $(this).data('id') }, function (res) {
+                if (res.success) alert('Mesaj tekrar işlendi.'); else alert(res.message || 'Hata oluştu');
+            });
+        });
+    });
+    </script>
+}

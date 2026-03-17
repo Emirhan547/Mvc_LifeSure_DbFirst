@@ -1,0 +1,19 @@
+﻿@model Mvc_LifeSure_DbFirst.Dtos.InsurancePackageDtos.ResultInsurancePackageDto
+@{
+    ViewBag.Title = "Paket Detayı";
+    ViewBag.PageTitle = "Paket Detayı";
+    ViewBag.BreadcrumbTitle = "Paketler";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="p-8">
+    <div class="max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
+        <h2 class="text-xl font-semibold">@Model.PackageName</h2>
+        <p><strong>Açıklama:</strong> @Model.Description</p>
+        <p><strong>Fiyat:</strong> @Model.BasePrice.ToString("C")</p>
+        <p><strong>Kapsam:</strong> @Model.CoveragePeriodMonths Ay</p>
+        <p><strong>Poliçe Sayısı:</strong> @Model.PolicyCount</p>
+        <p><strong>Durum:</strong> @(Model.IsActive ? "Aktif" : "Pasif")</p>
+        <a href="@Url.Action("Index")" class="inline-block mt-2 px-4 py-2 rounded-xl bg-primary text-white">Listeye Dön</a>
+    </div>
+</div>

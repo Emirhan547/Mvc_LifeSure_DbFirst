@@ -3,9 +3,10 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Data.Identity;
+using Mvc_LifeSure_DbFirst.Dtos.AppUserDtos;
 using Mvc_LifeSure_DbFirst.Services.AdminLogServices;
 using Mvc_LifeSure_DbFirst.Services.AppUserServices;
-using Mvc_LifeSure_DbFirst.ViewModels;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,15 +18,14 @@ namespace Mvc_LifeSure_DbFirst.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IAppUserService _userService;
         private readonly IAdminLogService _logService;
 
         // Constructor'da sadece kendi servislerimizi alalım
         public AccountController(
-            IAppUserService userService,
+
             IAdminLogService logService)
         {
-            _userService = userService;
+
             _logService = logService;
         }
 
@@ -79,7 +79,7 @@ namespace Mvc_LifeSure_DbFirst.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
+        public async Task<ActionResult> Login(LoginDto model, string returnUrl)
         {
             if (!ModelState.IsValid)
             {
@@ -105,7 +105,7 @@ namespace Mvc_LifeSure_DbFirst.Controllers
                         "Login",
                         "Account"
                     );
-                    return RedirectToLocal(returnUrl);
+                    return await RedirectToLocalAsync(returnUrl, user);
 
                 case SignInStatus.LockedOut:
                     return View("Lockout");
@@ -136,7 +136,7 @@ namespace Mvc_LifeSure_DbFirst.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Register(RegisterViewModel model)
+        public async Task<ActionResult> Register(RegisterDto model)
         {
             if (ModelState.IsValid)
             {
@@ -204,157 +204,17 @@ namespace Mvc_LifeSure_DbFirst.Controllers
         }
 
         // GET: /Account/Profile
-        [Authorize]
-        public async Task<ActionResult> Profile()
-        {
-            var userId = User.Identity.GetUserId();
-            var user = await _userService.GetUserWithPoliciesAsync(userId);
 
-            if (user == null)
-            {
-                return HttpNotFound();
-            }
 
-            var profile = new ProfileViewModel
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                UserName = user.UserName,
-                City = user.City,
-                BirthDate = user.BirthDate,
-                PhoneNumber = user.PhoneNumber,
-                CreatedAt = user.CreatedAt,
-                PolicyCount = user.PolicyCount
-            };
-
-            return View(profile);
-        }
-
-        // GET: /Account/EditProfile
-        [Authorize]
-        public async Task<ActionResult> EditProfile()
-        {
-            var userId = User.Identity.GetUserId();
-            var user = await _userService.GetUserByIdAsync(userId);
-
-            if (user == null)
-            {
-                return HttpNotFound();
-            }
-
-            var model = new ProfileViewModel
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                UserName = user.UserName,
-                City = user.City,
-                BirthDate = user.BirthDate,
-                PhoneNumber = user.PhoneNumber
-            };
-
-            return View(model);
-        }
-
-        // POST: /Account/EditProfile
-        [HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditProfile(ProfileViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var userId = User.Identity.GetUserId();
-                var user = await UserManager.FindByIdAsync(userId);
-
-                if (user == null)
-                {
-                    return HttpNotFound();
-                }
-
-                // Kullanıcı bilgilerini güncelle
-                user.FirstName = model.FirstName;
-                user.LastName = model.LastName;
-                user.Email = model.Email;
-                user.UserName = model.UserName;
-                user.City = model.City;
-                user.BirthDate = model.BirthDate;
-                user.PhoneNumber = model.PhoneNumber;
-
-                var result = await UserManager.UpdateAsync(user);
-
-                if (result.Succeeded)
-                {
-                    // Loglama
-                    _logService.LogAdminAction(
-                        userId,
-                        $"{user.UserName} kullanıcısı profilini güncelledi",
-                        "Update",
-                        "Account"
-                    );
-
-                    return RedirectToAction("Profile");
-                }
-
-                AddErrors(result);
-            }
-
-            return View(model);
-        }
-
-        // GET: /Account/ChangePassword
-        [Authorize]
-        public ActionResult ChangePassword()
-        {
-            return View();
-        }
-
-        // POST: /Account/ChangePassword
-        [HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangePassword(ChangePasswordViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var userId = User.Identity.GetUserId();
-            var result = await UserManager.ChangePasswordAsync(userId, model.OldPassword, model.NewPassword);
-
-            if (result.Succeeded)
-            {
-                var user = await UserManager.FindByIdAsync(userId);
-                if (user != null)
-                {
-                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-
-                    // Loglama
-                    _logService.LogAdminAction(
-                        userId,
-                        $"{user.UserName} kullanıcısı şifresini değiştirdi",
-                        "ChangePassword",
-                        "Account"
-                    );
-                }
-
-                return RedirectToAction("Profile", new { Message = "Şifreniz başarıyla değiştirildi." });
-            }
-
-            AddErrors(result);
-            return View(model);
-        }
-
-        #region Yardımcı Metotlar
-        private ActionResult RedirectToLocal(string returnUrl)
+        private async Task<ActionResult> RedirectToLocalAsync(string returnUrl, AppUser user)
         {
             if (Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
+            }
+            if (user != null && await UserManager.IsInRoleAsync(user.Id, "Admin"))
+            {
+                return RedirectToAction("Index", "About", new { area = "Admin" });
             }
             return RedirectToAction("Index", "Default");
         }
@@ -366,6 +226,8 @@ namespace Mvc_LifeSure_DbFirst.Controllers
                 ModelState.AddModelError("", error);
             }
         }
-      
+
     }
 }
+
+           

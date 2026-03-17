@@ -1,0 +1,27 @@
+﻿@model IEnumerable<Mvc_LifeSure_DbFirst.Dtos.PolicyDtos.ResultPolicyDto>
+@using Mvc_LifeSure_DbFirst.Dtos.AppUserDtos
+@{
+    ViewBag.Title = "Kullanıcı Poliçeleri";
+    ViewBag.PageTitle = "Kullanıcı Poliçeleri";
+    ViewBag.BreadcrumbTitle = "Poliçeler";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var user = ViewBag.User as ResultAppUserDto;
+}
+
+<div class="p-8 space-y-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <h2 class="text-xl font-semibold">@(user != null ? user.FirstName + " " + user.LastName : "Kullanıcı") - Poliçeler</h2>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-800"><tr><th class="px-4 py-3 text-left">No</th><th class="px-4 py-3 text-left">Paket</th><th class="px-4 py-3 text-left">Prim</th><th class="px-4 py-3 text-left">Bitiş</th></tr></thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="border-t border-slate-100 dark:border-slate-800"><td class="px-4 py-3">@item.PolicyNumber</td><td class="px-4 py-3">@item.PackageName</td><td class="px-4 py-3">@item.PremiumAmount.ToString("C")</td><td class="px-4 py-3">@item.EndDate.ToString("dd.MM.yyyy")</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

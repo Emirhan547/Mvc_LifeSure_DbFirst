@@ -1,0 +1,61 @@
+﻿@using System.Collections.Generic
+@{
+    ViewBag.Title = "Rol Yönetimi";
+    ViewBag.PageTitle = "Rol Yönetimi";
+    ViewBag.BreadcrumbTitle = "Kullanıcı Rolleri";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    var userId = ViewBag.UserId as string;
+    var userName = ViewBag.UserName as string;
+    var userRoles = ViewBag.UserRoles as IList<string>;
+    var allRoles = ViewBag.AllRoles as IList<string>;
+}
+
+<div class="p-8 space-y-6">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <h2 class="text-xl font-semibold">@userName için Rol Yönetimi</h2>
+        <p class="text-sm text-slate-500 mt-1">Kullanıcıya rol ekleyip çıkarabilirsiniz.</p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <h3 class="font-semibold mb-3">Mevcut Roller</h3>
+        <div class="flex flex-wrap gap-2 mb-4">
+            @if (userRoles != null && userRoles.Any())
+            {
+                foreach (var role in userRoles)
+                {
+                    <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 remove-role" data-role="@role">@role (Kaldır)</button>
+                }
+            }
+            else
+            {
+                <span class="text-slate-500">Rol bulunmuyor.</span>
+            }
+        </div>
+
+        <h3 class="font-semibold mb-3">Rol Ekle</h3>
+        <div class="flex flex-wrap gap-2">
+            @foreach (var role in allRoles ?? new List<string>())
+            {
+                <button class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 add-role" data-role="@role">@role Ekle</button>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    $(function() {
+        $('.add-role').click(function() {
+            $.post('@Url.Action("AddRole")', { userId: '@userId', role: $(this).data('role') }, function(r) {
+                if (r.success) location.reload(); else alert(r.message || 'Hata');
+            });
+        });
+        $('.remove-role').click(function() {
+            $.post('@Url.Action("RemoveRole")', { userId: '@userId', role: $(this).data('role') }, function(r) {
+                if (r.success) location.reload(); else alert(r.message || 'Hata');
+            });
+        });
+    });
+    </script>
+}

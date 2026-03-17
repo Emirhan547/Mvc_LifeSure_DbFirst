@@ -1,0 +1,53 @@
+﻿@model Mvc_LifeSure_DbFirst.Dtos.PolicyDtos.CreatePolicyDto
+@using Mvc_LifeSure_DbFirst.Dtos.AppUserDtos
+@using Mvc_LifeSure_DbFirst.Dtos.InsurancePackageDtos
+@{
+    ViewBag.Title = "Poliçe Oluştur";
+    ViewBag.PageTitle = "Poliçe Oluştur";
+    ViewBag.BreadcrumbTitle = "Poliçeler";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var users = ViewBag.Users as List<ResultAppUserDto>;
+    var packages = ViewBag.Packages as List<ResultInsurancePackageDto>;
+}
+
+<div class="p-8">
+    <div class="max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label>Müşteri</label>
+                    <select name="UserId" class="w-full rounded-xl border-slate-300">
+                        @foreach (var user in users ?? new List<ResultAppUserDto>())
+                        {
+                            <option value="@user.Id">@user.FirstName @user.LastName (@user.UserName)</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label>Paket</label>
+                    <select name="InsurancePackageId" class="w-full rounded-xl border-slate-300">
+                        @foreach (var package in packages ?? new List<ResultInsurancePackageDto>())
+                        {
+                            <option value="@package.Id">@package.PackageName - @package.BasePrice.ToString("C")</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label>Başlangıç</label>
+                    @Html.TextBoxFor(x => x.StartDate, "{0:yyyy-MM-dd}", new { @class = "w-full rounded-xl border-slate-300", type = "date" })
+                </div>
+                <div>
+                    <label>Bitiş</label>
+                    @Html.TextBoxFor(x => x.EndDate, "{0:yyyy-MM-dd}", new { @class = "w-full rounded-xl border-slate-300", type = "date" })
+                </div>
+                <div class="md:col-span-2">
+                    <label>Prim Tutarı</label>
+                    @Html.TextBoxFor(x => x.PremiumAmount, new { @class = "w-full rounded-xl border-slate-300", type = "number", step = "0.01" })
+                </div>
+            </div>
+            <button type="submit" class="mt-4 px-4 py-2 rounded-xl bg-primary text-white">Kaydet</button>
+        }
+    </div>
+</div>

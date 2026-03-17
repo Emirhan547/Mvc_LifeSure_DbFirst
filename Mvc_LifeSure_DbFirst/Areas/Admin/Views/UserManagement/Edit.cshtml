@@ -1,0 +1,28 @@
+﻿@model Mvc_LifeSure_DbFirst.Dtos.AppUserDtos.UpdateAppUserDto
+@{
+    ViewBag.Title = "Kullanıcı Düzenle";
+    ViewBag.PageTitle = "Kullanıcı Düzenle";
+    ViewBag.BreadcrumbTitle = "Kullanıcılar";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="p-8">
+    <div class="max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(x => x.Id)
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @Html.TextBoxFor(x => x.FirstName, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Ad" })
+                @Html.TextBoxFor(x => x.LastName, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Soyad" })
+                @Html.TextBoxFor(x => x.UserName, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Kullanıcı Adı" })
+                @Html.TextBoxFor(x => x.Email, new { @class = "w-full rounded-xl border-slate-300", type = "email", placeholder = "Email" })
+                @Html.TextBoxFor(x => x.PhoneNumber, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Telefon" })
+                @Html.TextBoxFor(x => x.City, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Şehir" })
+                @Html.TextBoxFor(x => x.BirthDate, "{0:yyyy-MM-dd}", new { @class = "w-full rounded-xl border-slate-300", type = "date" })
+                <label class="flex items-center gap-2">@Html.CheckBoxFor(x => x.IsActive) <span>Aktif</span></label>
+            </div>
+            <button type="submit" class="mt-4 px-4 py-2 rounded-xl bg-primary text-white">Güncelle</button>
+        }
+    </div>
+</div>

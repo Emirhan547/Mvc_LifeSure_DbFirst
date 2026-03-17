@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Mvc_LifeSure_DbFirst.Dtos.PolicyDtos.ResultPolicyDto>
+@{
+    ViewBag.Title = "Poliçe Yönetimi";
+    ViewBag.PageTitle = "Poliçe Yönetimi";
+    ViewBag.BreadcrumbTitle = "Poliçeler";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="p-8 space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-semibold">Poliçe Listesi</h2>
+        <a href="@Url.Action("Create")" class="px-4 py-2 rounded-xl bg-primary text-white">Yeni Poliçe</a>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <table class="w-full min-w-[1000px] text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-800 text-left"><tr><th class="px-4 py-3">No</th><th class="px-4 py-3">Müşteri</th><th class="px-4 py-3">Paket</th><th class="px-4 py-3">Prim</th><th class="px-4 py-3">Bitiş</th><th class="px-4 py-3 text-right">İşlem</th></tr></thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="border-t border-slate-100 dark:border-slate-800">
+                        <td class="px-4 py-3">@item.PolicyNumber</td>
+                        <td class="px-4 py-3">@item.UserFullName</td>
+                        <td class="px-4 py-3">@item.PackageName</td>
+                        <td class="px-4 py-3">@item.PremiumAmount.ToString("C")</td>
+                        <td class="px-4 py-3">@item.EndDate.ToString("dd.MM.yyyy")</td>
+                        <td class="px-4 py-3"><div class="flex justify-end gap-2"><a href="@Url.Action("Details", new { id = item.Id })" class="px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700">Detay</a><a href="@Url.Action("Edit", new { id = item.Id })" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700">Düzenle</a><button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 delete-btn" data-id="@item.Id">Sil</button></div></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@section Scripts {
+    <script>
+$(function(){ $('.delete-btn').click(function(){ if(!confirm('Poliçe silinsin mi?')) return; $.post('@Url.Action("Delete")',{id:$(this).data('id')},function(r){ if(r.success) location.reload(); else alert(r.message||'Hata');});});});
+    </script>
+}
