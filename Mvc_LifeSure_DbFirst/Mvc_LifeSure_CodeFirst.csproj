@@ -364,9 +364,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202603171152359_InitialCreate.cs" />
-    <Compile Include="Migrations\202603171152359_InitialCreate.Designer.cs">
-      <DependentUpon>202603171152359_InitialCreate.cs</DependentUpon>
+    <Compile Include="Migrations\202603171336242_AddIdentityTables.cs" />
+    <Compile Include="Migrations\202603171336242_AddIdentityTables.Designer.cs">
+      <DependentUpon>202603171336242_AddIdentityTables.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -442,6 +442,7 @@
     <Compile Include="Validators\AboutValidators\UpdateAboutValidator.cs" />
     <Compile Include="Validators\AppUserValidators\LoginValidator.cs" />
     <Compile Include="Validators\AppUserValidators\RegisterValidator.cs" />
+    <Compile Include="Validators\AppUserValidators\UpdateAppUserValidator.cs" />
     <Compile Include="Validators\BlogValidators\CreateBlogValidator.cs" />
     <Compile Include="Validators\BlogValidators\UpdateBlogValidator.cs" />
     <Compile Include="Validators\ContactMessageValidators\CreateContactMessageValidator.cs" />
@@ -452,6 +453,7 @@
     <Compile Include="Validators\InsurancePackageValidators\CreateInsurancePackageValidator.cs" />
     <Compile Include="Validators\InsurancePackageValidators\UpdateInsurancePackageValidator.cs" />
     <Compile Include="Validators\PolicyValidators\CreatePolicyValidator.cs" />
+    <Compile Include="Validators\PolicyValidators\UpdatePolicyValidator.cs" />
     <Compile Include="Validators\ServiceValidators\CreateServicesValidator.cs" />
     <Compile Include="Validators\ServiceValidators\UpdateServicesValidator.cs" />
     <Compile Include="Validators\SliderValidators\CreateSliderValidator.cs" />
@@ -749,8 +751,8 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202603171152359_InitialCreate.resx">
-      <DependentUpon>202603171152359_InitialCreate.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202603171336242_AddIdentityTables.resx">
+      <DependentUpon>202603171336242_AddIdentityTables.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

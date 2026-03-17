@@ -19,31 +19,42 @@ namespace Mvc_LifeSure_DbFirst.Controllers
     {
         private readonly IAppUserService _userService;
         private readonly IAdminLogService _logService;
-        private AppUserManager _userManager;
-        private AppSignInManager _signInManager;
 
+        // Constructor'da sadece kendi servislerimizi alalım
         public AccountController(
             IAppUserService userService,
-            IAdminLogService logService,
-            AppUserManager userManager,
-            AppSignInManager signInManager)
+            IAdminLogService logService)
         {
             _userService = userService;
             _logService = logService;
-            _userManager = userManager;
-            _signInManager = signInManager;
         }
 
+        // UserManager'ı OWIN'den al
+        private AppUserManager _userManager;
         public AppUserManager UserManager
         {
-            get { return _userManager ?? HttpContext.GetOwinContext().GetUserManager<AppUserManager>(); }
-            private set { _userManager = value; }
+            get
+            {
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<AppUserManager>();
+            }
+            private set
+            {
+                _userManager = value;
+            }
         }
 
+        // SignInManager'ı OWIN'den al
+        private AppSignInManager _signInManager;
         public AppSignInManager SignInManager
         {
-            get { return _signInManager ?? HttpContext.GetOwinContext().Get<AppSignInManager>(); }
-            private set { _signInManager = value; }
+            get
+            {
+                return _signInManager ?? HttpContext.GetOwinContext().Get<AppSignInManager>();
+            }
+            private set
+            {
+                _signInManager = value;
+            }
         }
 
         private IAuthenticationManager AuthenticationManager
@@ -282,8 +293,7 @@ namespace Mvc_LifeSure_DbFirst.Controllers
                         userId,
                         $"{user.UserName} kullanıcısı profilini güncelledi",
                         "Update",
-                        "Account",
-                        int.TryParse(userId, out int id) ? id : 0
+                        "Account"
                     );
 
                     return RedirectToAction("Profile");
@@ -339,103 +349,6 @@ namespace Mvc_LifeSure_DbFirst.Controllers
             return View(model);
         }
 
-        // GET: /Account/ForgotPassword
-        [AllowAnonymous]
-        public ActionResult ForgotPassword()
-        {
-            return View();
-        }
-
-        // POST: /Account/ForgotPassword
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ForgotPassword(ForgotPasswordViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = await UserManager.FindByEmailAsync(model.Email);
-                if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
-                {
-                    // Kullanıcı bulunamadı veya email onaylı değil
-                    return View("ForgotPasswordConfirmation");
-                }
-
-                // TODO: Email gönderme işlemi
-                string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-                var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-
-                // await UserManager.SendEmailAsync(user.Id, "Şifre Sıfırlama", $"Şifrenizi sıfırlamak için <a href='{callbackUrl}'>tıklayınız</a>");
-
-                return RedirectToAction("ForgotPasswordConfirmation", "Account");
-            }
-
-            return View(model);
-        }
-
-        // GET: /Account/ForgotPasswordConfirmation
-        [AllowAnonymous]
-        public ActionResult ForgotPasswordConfirmation()
-        {
-            return View();
-        }
-
-        // GET: /Account/ResetPassword
-        [AllowAnonymous]
-        public ActionResult ResetPassword(string code)
-        {
-            return code == null ? View("Error") : View();
-        }
-
-        // POST: /Account/ResetPassword
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ResetPassword(ResetPasswordViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var user = await UserManager.FindByEmailAsync(model.Email);
-            if (user == null)
-            {
-                // Kullanıcı bulunamadı
-                return RedirectToAction("ResetPasswordConfirmation", "Account");
-            }
-
-            var result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
-            if (result.Succeeded)
-            {
-                // Loglama
-                _logService.LogAdminAction(
-                    user.Id,
-                    $"{user.UserName} kullanıcısı şifresini sıfırladı",
-                    "ResetPassword",
-                    "Account"
-                );
-
-                return RedirectToAction("ResetPasswordConfirmation", "Account");
-            }
-
-            AddErrors(result);
-            return View();
-        }
-
-        // GET: /Account/ResetPasswordConfirmation
-        [AllowAnonymous]
-        public ActionResult ResetPasswordConfirmation()
-        {
-            return View();
-        }
-
-        // GET: /Account/AccessDenied
-        public ActionResult AccessDenied()
-        {
-            return View();
-        }
-
         #region Yardımcı Metotlar
         private ActionResult RedirectToLocal(string returnUrl)
         {
@@ -453,6 +366,6 @@ namespace Mvc_LifeSure_DbFirst.Controllers
                 ModelState.AddModelError("", error);
             }
         }
-        #endregion
+      
     }
 }

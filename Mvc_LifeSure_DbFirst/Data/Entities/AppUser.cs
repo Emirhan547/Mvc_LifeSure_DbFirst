@@ -19,7 +19,6 @@ namespace Mvc_LifeSure_DbFirst.Data.Entities
         public bool IsActive { get; set; } = true;
 
         public virtual ICollection<Policy> Policies { get; set; }
-
         public virtual ICollection<AdminLog> AdminLogs { get; set; }
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<AppUser, string> manager)

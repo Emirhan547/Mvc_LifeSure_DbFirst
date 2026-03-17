@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNet.Identity.Owin;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
+using Mvc_LifeSure_DbFirst.App_Start;
 using Mvc_LifeSure_DbFirst.Data.Context;
 using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Data.Identity;
 using Owin;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 [assembly: OwinStartup(typeof(Mvc_LifeSure_DbFirst.App_Start.Startup))]
 
@@ -18,13 +17,10 @@ namespace Mvc_LifeSure_DbFirst.App_Start
     {
         public void Configuration(IAppBuilder app)
         {
-            app.CreatePerOwinContext(AppDbContext.Create);
-            app.CreatePerOwinContext<AppUserManager>(AppUserManager.Create);
-            app.CreatePerOwinContext<AppSignInManager>(AppSignInManager.Create);
-
+            // Cookie authentication'ı yapılandır
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
-                AuthenticationType = "ApplicationCookie",
+                AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
                 LoginPath = new PathString("/Account/Login"),
                 Provider = new CookieAuthenticationProvider
                 {
@@ -33,6 +29,11 @@ namespace Mvc_LifeSure_DbFirst.App_Start
                         regenerateIdentity: (manager, user) => user.GenerateUserIdentityAsync(manager))
                 }
             });
+
+            // Kullanıcı ve rol yöneticilerini OWIN context'ine kaydet
+            app.CreatePerOwinContext(AppDbContext.Create);
+            app.CreatePerOwinContext<AppUserManager>(AppUserManager.Create);
+            app.CreatePerOwinContext<AppSignInManager>(AppSignInManager.Create);
         }
     }
 }

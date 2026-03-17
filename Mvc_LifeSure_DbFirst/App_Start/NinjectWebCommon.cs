@@ -6,6 +6,11 @@ using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using Mvc_LifeSure_DbFirst.Data.Context;
 using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Data.Identity;
+using Mvc_LifeSure_DbFirst.Dtos.AboutDtos;
+using Mvc_LifeSure_DbFirst.Dtos.AppUserDtos;
+using Mvc_LifeSure_DbFirst.Dtos.ContactMessageDtos;
+using Mvc_LifeSure_DbFirst.Dtos.InsurancePackageDtos;
+using Mvc_LifeSure_DbFirst.Dtos.PolicyDtos;
 using Mvc_LifeSure_DbFirst.Repositories.AboutRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.AdminLogRepositories;
 using Mvc_LifeSure_DbFirst.Repositories.BlogRepositories;
@@ -35,6 +40,11 @@ using Mvc_LifeSure_DbFirst.Services.ServiceServices;
 using Mvc_LifeSure_DbFirst.Services.SliderServices;
 using Mvc_LifeSure_DbFirst.Services.TeamServices;
 using Mvc_LifeSure_DbFirst.Services.TestimonialServices;
+using Mvc_LifeSure_DbFirst.Validators.AboutValidators;
+using Mvc_LifeSure_DbFirst.Validators.AppUserValidators;
+using Mvc_LifeSure_DbFirst.Validators.ContactMessageValidators;
+using Mvc_LifeSure_DbFirst.Validators.InsurancePackageValidators;
+using Mvc_LifeSure_DbFirst.Validators.PolicyValidators;
 using Ninject;
 using Ninject.Web.Common;
 using Ninject.Web.Mvc;
@@ -77,110 +87,112 @@ namespace Mvc_LifeSure_DbFirst.App_Start
 
         private static void RegisterServices(IKernel kernel)
         {
-            // DbContext
-            kernel.Bind<AppDbContext>()
-                  .ToSelf()
-                  .InRequestScope();
+            kernel.Bind<AppDbContext>().ToSelf().InRequestScope();
 
+            // IDENTITY BINDINGS
+            kernel.Bind<IUserStore<AppUser>>().To<UserStore<AppUser>>().InRequestScope();
+            kernel.Bind<IRoleStore<AppRole, string>>().To<RoleStore<AppRole>>().InRequestScope();
 
-            // Repository
-            kernel.Bind<IAboutRepository>()
-                  .To<AboutRepository>();
+            // AppUserManager binding'i
+            kernel.Bind<AppUserManager>().ToMethod(context =>
+            {
+                var userStore = context.Kernel.Get<IUserStore<AppUser>>();
+                return new AppUserManager(userStore);
+            }).InRequestScope();
 
-            kernel.Bind<IBlogRepository>()
-                  .To<BlogRepository>();
+            // UserManager<AppUser, string> binding'i (AppUserService için gerekli)
+            kernel.Bind<UserManager<AppUser, string>>().ToMethod(context =>
+            {
+                var userStore = context.Kernel.Get<IUserStore<AppUser>>();
+                return new UserManager<AppUser, string>(userStore);
+            }).InRequestScope();
 
-            kernel.Bind<IFaqRepository>()
-                  .To<FaqRepository>();
+            // AppSignInManager binding'i
+            kernel.Bind<AppSignInManager>().ToMethod(context =>
+            {
+                var userManager = context.Kernel.Get<AppUserManager>();
+                var authManager = context.Kernel.Get<IAuthenticationManager>();
+                return new AppSignInManager(userManager, authManager);
+            }).InRequestScope();
 
-            kernel.Bind<IFeatureRepository>()
-                  .To<FeatureRepository>();
+            // AuthenticationManager
+            kernel.Bind<IAuthenticationManager>().ToMethod(context =>
+                HttpContext.Current.GetOwinContext().Authentication).InRequestScope();
 
-            kernel.Bind<IServicesRepository>()
-                  .To<ServicesRepository>();
-
-            kernel.Bind<ISliderRepository>()
-                  .To<SliderRepository>();
-
-            kernel.Bind<ITeamRepository>()
-                  .To<TeamRepository>();
-
-            kernel.Bind<ITestimonialRepository>()
-                  .To<TestimonialRepository>();
-
+            // Repository Bindings
+            kernel.Bind<IAboutRepository>().To<AboutRepository>();
+            kernel.Bind<IBlogRepository>().To<BlogRepository>();
+            kernel.Bind<IFaqRepository>().To<FaqRepository>();
+            kernel.Bind<IFeatureRepository>().To<FeatureRepository>();
+            kernel.Bind<IServicesRepository>().To<ServicesRepository>();
+            kernel.Bind<ISliderRepository>().To<SliderRepository>();
+            kernel.Bind<ITeamRepository>().To<TeamRepository>();
+            kernel.Bind<ITestimonialRepository>().To<TestimonialRepository>();
             kernel.Bind<IInsurancePackageRepository>().To<InsurancePackageRepository>();
             kernel.Bind<IPolicyRepository>().To<PolicyRepository>();
             kernel.Bind<IContactMessageRepository>().To<ContactMessageRepository>();
             kernel.Bind<IAdminLogRepository>().To<AdminLogRepository>();
             kernel.Bind<IPolicySaleDataRepository>().To<PolicySaleDataRepository>();
 
-            //Services
-            kernel.Bind<IAboutService>()
-                 .To<AboutService>();
-
-            kernel.Bind<IBlogService>()
-                .To<BlogService>();
-
-            kernel.Bind<IFaqService>()
-                .To<FaqService>();
-
-            kernel.Bind<IFeatureService>()
-                .To<FeatureService>();
-
-            kernel.Bind<IServicesService>()
-               .To<ServicesService>();
-
-            kernel.Bind<ISliderService>()
-               .To<SliderService>();
-            kernel.Bind<IForecastService>().To<ForecastService>().InRequestScope();
-            kernel.Bind<ITeamService>()
-               .To<TeamService>();
-            kernel.Bind<IHuggingFaceService>().To<HuggingFaceService>().InRequestScope();
-            kernel.Bind<IChatGPTService>().To<ChatGPTService>().InRequestScope();
-            kernel.Bind<IMailService>().To<MailService>().InRequestScope();
-            kernel.Bind<ITestimonialService>()
-              .To<TestimonialService>();
+            // Service Bindings
+            kernel.Bind<IAboutService>().To<AboutService>();
+            kernel.Bind<IBlogService>().To<BlogService>();
+            kernel.Bind<IFaqService>().To<FaqService>();
+            kernel.Bind<IFeatureService>().To<FeatureService>();
+            kernel.Bind<IServicesService>().To<ServicesService>();
+            kernel.Bind<ISliderService>().To<SliderService>();
+            kernel.Bind<ITeamService>().To<TeamService>();
+            kernel.Bind<ITestimonialService>().To<TestimonialService>();
             kernel.Bind<IAppUserService>().To<AppUserService>();
             kernel.Bind<IInsurancePackageService>().To<InsurancePackageService>();
             kernel.Bind<IPolicyService>().To<PolicyService>();
             kernel.Bind<IContactMessageService>().To<ContactMessageService>();
             kernel.Bind<IAdminLogService>().To<AdminLogService>();
+            kernel.Bind<IPolicySaleDataService>().To<PolicySaleDataService>();
+            kernel.Bind<IForecastService>().To<ForecastService>().InRequestScope();
+
+            // AI Servisleri
             kernel.Bind<IHuggingFaceService>().To<HuggingFaceService>().InRequestScope();
             kernel.Bind<IChatGPTService>().To<ChatGPTService>().InRequestScope();
             kernel.Bind<IMailService>().To<MailService>().InRequestScope();
-            kernel.Bind<IGeminiService>().To<GeminiService>().InRequestScope(); // YENİ
+            kernel.Bind<IGeminiService>().To<GeminiService>().InRequestScope();
+            kernel.Bind<ITavilyService>().To<TavilyService>().InRequestScope();
 
-            // PolicySaleData
-            kernel.Bind<IPolicySaleDataRepository>().To<PolicySaleDataRepository>(); // YENİ
-            kernel.Bind<IPolicySaleDataService>().To<PolicySaleDataService>();
-            // Identity için gerekli
-            kernel.Bind<UserManager<AppUser, string>>().ToMethod(context =>
-            {
-                var userStore = new UserStore<AppUser, AppRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>(context.Kernel.Get<AppDbContext>());
-                return new UserManager<AppUser, string>(userStore);
-            }).InRequestScope();
-            // Identity servisleri
-            kernel.Bind<IUserStore<AppUser>>().To<UserStore<AppUser>>().InRequestScope();
-            kernel.Bind<IRoleStore<AppRole, string>>().To<RoleStore<AppRole>>().InRequestScope();
-            kernel.Bind<AppUserManager>().ToSelf().InRequestScope();
-            kernel.Bind<AppSignInManager>().ToSelf().InRequestScope();
-            kernel.Bind<IAuthenticationManager>().ToMethod(context =>
-                HttpContext.Current.GetOwinContext().Authentication).InRequestScope();
+            // VALIDATOR BINDINGS - MANUEL OLARAK EKLİYORUZ (Otomatik bulma çalışmazsa diye)
+            kernel.Bind<IValidator<CreateAboutDto>>().To<CreateAboutValidator>().InTransientScope();
+            kernel.Bind<IValidator<UpdateAboutDto>>().To<UpdateAboutValidator>().InTransientScope();
 
+            kernel.Bind<IValidator<RegisterDto>>().To<RegisterValidator>().InTransientScope();
+            kernel.Bind<IValidator<LoginDto>>().To<LoginValidator>().InTransientScope();
+            kernel.Bind<IValidator<UpdateAppUserDto>>().To<UpdateAppUserValidator>().InTransientScope();
+
+            kernel.Bind<IValidator<CreateInsurancePackageDto>>().To<CreateInsurancePackageValidator>().InTransientScope();
+            kernel.Bind<IValidator<UpdateInsurancePackageDto>>().To<UpdateInsurancePackageValidator>().InTransientScope();
+
+            kernel.Bind<IValidator<CreatePolicyDto>>().To<CreatePolicyValidator>().InTransientScope();
+            kernel.Bind<IValidator<UpdatePolicyDto>>().To<UpdatePolicyValidator>().InTransientScope();
+
+            kernel.Bind<IValidator<CreateContactMessageDto>>().To<CreateContactMessageValidator>().InTransientScope();
+
+            // OTOMATİK VALIDATOR BINDING (Yedek olarak)
             var validators = Assembly.GetExecutingAssembly()
-    .GetTypes()
-    .Where(t => !t.IsAbstract && !t.IsInterface)
-    .SelectMany(t => t.GetInterfaces(),
-        (t, i) => new { Validator = t, Interface = i })
-    .Where(x =>
-        x.Interface.IsGenericType &&
-        x.Interface.GetGenericTypeDefinition() == typeof(IValidator<>));
+                .GetTypes()
+                .Where(t => !t.IsAbstract && !t.IsInterface)
+                .SelectMany(t => t.GetInterfaces(),
+                    (t, i) => new { Validator = t, Interface = i })
+                .Where(x =>
+                    x.Interface.IsGenericType &&
+                    x.Interface.GetGenericTypeDefinition() == typeof(IValidator<>));
 
             foreach (var validator in validators)
             {
-                kernel.Bind(validator.Interface)
-                      .To(validator.Validator)
-                      .InTransientScope();
+                // Eğer daha önce manuel eklenmemişse ekle
+                if (!kernel.GetBindings(validator.Interface).Any())
+                {
+                    kernel.Bind(validator.Interface)
+                          .To(validator.Validator)
+                          .InTransientScope();
+                }
             }
         }
     }
