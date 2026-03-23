@@ -3,6 +3,7 @@ using MailKit.Security;
 using MimeKit;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -11,10 +12,18 @@ namespace Mvc_LifeSure_DbFirst.Services.AIServices
 {
     public class MailService : IMailService
     {
-        private readonly string _smtpServer = "smtp.gmail.com"; // appsettings'e taşı
-        private readonly int _smtpPort = 587;
-        private readonly string _smtpUser = "your-email@gmail.com";
-        private readonly string _smtpPass = "your-app-password";
+        private readonly string _smtpServer;
+        private readonly int _smtpPort;
+        private readonly string _smtpUser;
+        private readonly string _smtpPass;
+
+        public MailService()
+        {
+            _smtpServer = ConfigurationManager.AppSettings["SmtpServer"];
+            _smtpPort = int.Parse(ConfigurationManager.AppSettings["SmtpPort"]);
+            _smtpUser = ConfigurationManager.AppSettings["SmtpUser"];
+            _smtpPass = ConfigurationManager.AppSettings["SmtpPass"];
+        }
 
         public async Task SendEmailAsync(string to, string subject, string body)
         {

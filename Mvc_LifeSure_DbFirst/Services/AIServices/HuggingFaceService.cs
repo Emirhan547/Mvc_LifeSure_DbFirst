@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -12,9 +13,12 @@ namespace Mvc_LifeSure_DbFirst.Services.AIServices
 {
     public class HuggingFaceService : IHuggingFaceService
     {
-        private readonly string _apiKey = "YOUR_HUGGINGFACE_API_KEY";
+        private readonly string _apiKey;
         private readonly string _apiUrl = "https://api-inference.huggingface.co/models/facebook/bart-large-mnli";
-
+        public HuggingFaceService()
+        {
+            _apiKey = ConfigurationManager.AppSettings["HuggingFaceApiKey"];
+        }
         public async Task<string> ClassifyMessageAsync(string message)
         {
             try

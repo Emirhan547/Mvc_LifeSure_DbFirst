@@ -368,6 +368,10 @@
     <Compile Include="Migrations\202603231626135_InitialCreate.Designer.cs">
       <DependentUpon>202603231626135_InitialCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202603231930469_UpdateAppUser.cs" />
+    <Compile Include="Migrations\202603231930469_UpdateAppUser.Designer.cs">
+      <DependentUpon>202603231930469_UpdateAppUser.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\AboutRepositories\AboutRepository.cs" />
@@ -758,6 +762,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202603231626135_InitialCreate.resx">
       <DependentUpon>202603231626135_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603231930469_UpdateAppUser.resx">
+      <DependentUpon>202603231930469_UpdateAppUser.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

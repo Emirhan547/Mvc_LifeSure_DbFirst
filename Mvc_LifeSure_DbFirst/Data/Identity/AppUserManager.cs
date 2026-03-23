@@ -19,7 +19,9 @@ namespace Mvc_LifeSure_DbFirst.Data.Identity
 
         public static AppUserManager Create(IdentityFactoryOptions<AppUserManager> options, IOwinContext context)
         {
-            var manager = new AppUserManager(new UserStore<AppUser, AppRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>(context.Get<AppDbContext>()));
+            var manager = new AppUserManager(
+      new UserStore<AppUser, AppRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>(
+          context.Get<AppDbContext>()));
 
             // Kullanıcı adı validasyonu
             manager.UserValidator = new UserValidator<AppUser>(manager)

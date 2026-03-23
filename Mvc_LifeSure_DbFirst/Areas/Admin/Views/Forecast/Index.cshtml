@@ -36,9 +36,9 @@
                 <select id="citySelect"
                         class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                     <option value="">-- Şehir Seçin --</option>
-                    @foreach (var city in ViewBag.Cities)
+                    @foreach (System.Web.Mvc.SelectListItem city in ViewBag.Cities)
                     {
-                        <option value="@city">@city</option>
+                        <option value="@city.Value">@city.Text</option>
                     }
                 </select>
             </div>
@@ -177,8 +177,8 @@
             });
 
             function renderForecast(data) {
-                var totalSales = data.reduce(function (s, d) { return s + d.predictedSales; }, 0);
-                var totalPremium = data.reduce(function (s, d) { return s + d.predictedPremium; }, 0);
+                var totalSales = data.reduce(function (s, d) { return s + d.PredictedSales; }, 0);
+                var totalPremium = data.reduce(function (s, d) { return s + d.PredictedPremium; }, 0);
                 var avgSales = totalSales / data.length;
                 var avgPremium = totalPremium / data.length;
 
@@ -190,13 +190,13 @@
 
                 var tbody = "";
                 $.each(data, function (i, item) {
-                    var range = Math.round((item.confidenceUpper - item.confidenceLower) / 2);
+                    var range = Math.round((item.ConfidenceUpper - item.ConfidenceLower) / 2);
                     tbody += "<tr class='border-t border-slate-100'>" +
-                        "<td class='px-4 py-3 font-medium text-slate-700'>" + item.period + "</td>" +
-                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.predictedSales) + " adet</td>" +
-                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.predictedPremium).toLocaleString("tr-TR") + " ₺</td>" +
-                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.confidenceLower) + "</td>" +
-                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.confidenceUpper) + "</td>" +
+                        "<td class='px-4 py-3 font-medium text-slate-700'>" + item.Period + "</td>" +
+                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.PredictedSales) + " adet</td>" +
+                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.PredictedPremium).toLocaleString("tr-TR") + " ₺</td>" +
+                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.ConfidenceLower) + "</td>" +
+                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.ConfidenceUpper) + "</td>" +
                         "<td class='px-4 py-3 text-slate-600'>±" + range + " adet</td>" +
                         "</tr>";
                 });
@@ -206,11 +206,11 @@
                 chart = new Chart(document.getElementById("forecastChart"), {
                     type: "line",
                     data: {
-                        labels: data.map(function (d) { return d.period; }),
+                        labels: data.map(function (d) { return d.Period; }),
                         datasets: [
                             {
                                 label: "Tahmini Satış",
-                                data: data.map(function (d) { return d.predictedSales; }),
+                                data: data.map(function (d) { return d.PredictedSales; }),
                                 borderColor: "#1193d4",
                                 backgroundColor: "rgba(17,147,212,0.08)",
                                 tension: 0.4,
@@ -219,7 +219,7 @@
                             },
                             {
                                 label: "Alt Limit",
-                                data: data.map(function (d) { return d.confidenceLower; }),
+                                data: data.map(function (d) { return d.ConfidenceLower; }),
                                 borderColor: "rgba(239,68,68,0.4)",
                                 borderDash: [5, 5],
                                 fill: false,
@@ -227,7 +227,7 @@
                             },
                             {
                                 label: "Üst Limit",
-                                data: data.map(function (d) { return d.confidenceUpper; }),
+                                data: data.map(function (d) { return d.ConfidenceUpper; }),
                                 borderColor: "rgba(34,197,94,0.4)",
                                 borderDash: [5, 5],
                                 fill: false,

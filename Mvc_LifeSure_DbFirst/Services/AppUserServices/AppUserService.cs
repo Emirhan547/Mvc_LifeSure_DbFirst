@@ -4,6 +4,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Mvc_LifeSure_DbFirst.Data.Context;
 using Mvc_LifeSure_DbFirst.Data.Entities;
+using Mvc_LifeSure_DbFirst.Data.Identity;
 using Mvc_LifeSure_DbFirst.Dtos.AppUserDtos;
 using Mvc_LifeSure_DbFirst.Repositories.PolicyRepositories;
 using System;
@@ -23,12 +24,12 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
         private readonly IValidator<UpdateAppUserDto> _updateValidator;
 
         public AppUserService(
-            AppDbContext context,
-            UserManager<AppUser, string> userManager,
-            IPolicyRepository policyRepository,
-            IValidator<UpdateAppUserDto> updateValidator)
+      AppDbContext context,
+      IPolicyRepository policyRepository,
+      IValidator<UpdateAppUserDto> updateValidator,
+      AppUserManager userManager)
         {
-            _context = context;
+            _context = context; // artık protected property’ye gerek yok
             _userManager = userManager;
             _policyRepository = policyRepository;
             _updateValidator = updateValidator;
@@ -72,9 +73,8 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
         public async Task<ResultAppUserDto> GetUserWithPoliciesAsync(string id)
         {
             var user = await _context.Users
-                .Include(u => u.Policies)
-                .Include(u => u.Policies.Select(p => p.InsurancePackage))
-                .FirstOrDefaultAsync(u => u.Id == id);
+     .Include("Policies.InsurancePackage")
+     .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
                 throw new KeyNotFoundException("Kullanıcı bulunamadı");

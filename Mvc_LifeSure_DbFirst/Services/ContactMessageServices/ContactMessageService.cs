@@ -128,5 +128,20 @@ namespace Mvc_LifeSure_DbFirst.Services.ContactMessageServices
                 }
             }
         }
+
+        public async Task ReprocessMessageAsync(int id)
+        {
+            var message = _messageRepository.GetById(id);
+            if (message == null)
+                throw new KeyNotFoundException("Mesaj bulunamadı");
+
+            // Önce cevap ve kategori sıfırlansın
+            message.IsReplied = false;
+            message.AutoReply = null;
+            message.Category = null;
+            _messageRepository.Update(message);
+
+            await ProcessMessageAsync(id);
+        }
     }
 }

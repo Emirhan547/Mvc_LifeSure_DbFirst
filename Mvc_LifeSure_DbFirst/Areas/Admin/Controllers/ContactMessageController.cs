@@ -46,14 +46,12 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
         }
-
         [HttpPost]
         public async Task<ActionResult> Reprocess(int id)
         {
             try
             {
-                // ContactMessage service'e ReprocessMessageAsync eklenmeli
-                // await _contactService.ReprocessMessageAsync(id);
+                await _contactService.ReprocessMessageAsync(id);
 
                 LogAction(
                     $"Mesaj yeniden işleniyor (ID: {id})",
@@ -91,5 +89,6 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
     }
 }

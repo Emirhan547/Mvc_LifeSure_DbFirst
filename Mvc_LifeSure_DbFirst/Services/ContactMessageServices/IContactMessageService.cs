@@ -14,6 +14,7 @@ namespace Mvc_LifeSure_DbFirst.Services.ContactMessageServices
         void Create(CreateContactMessageDto createDto);
         void Delete(int id);
         Task ProcessMessageAsync(int id); // Kategorize et ve otomatik cevap gönder
+        Task ReprocessMessageAsync(int id); // Yeniden işleme
         List<ResultContactMessageDto> GetUnrepliedMessages();
         Dictionary<string, int> GetMessageStatsByCategory();
     }
