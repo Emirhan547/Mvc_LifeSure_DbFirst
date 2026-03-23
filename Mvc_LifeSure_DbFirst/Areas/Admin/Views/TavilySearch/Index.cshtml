@@ -1,0 +1,224 @@
+﻿@{
+    ViewBag.Title = "Tavily AI Web Arama";
+    ViewBag.PageTitle = "Tavily AI Web Arama";
+    ViewBag.BreadcrumbTitle = "Web Arama";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "antiForgeryForm", style = "display:none;" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+<div class="p-8 space-y-6">
+
+
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+        <h1 class="text-2xl font-bold">Tavily AI Web Arama</h1>
+        <p class="mt-1 text-sm text-white/90">Güncel web içeriklerini Tavily AI ile tarayın; sigorta haberleri, piyasa analizleri ve daha fazlası.</p>
+    </div>
+
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div class="flex gap-3">
+            <input id="searchQuery" type="text" placeholder="Aramak istediğiniz konuyu yazın…"
+                   class="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            <select id="maxResults"
+                    class="rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="3">3 sonuç</option>
+                <option value="5" selected>5 sonuç</option>
+                <option value="8">8 sonuç</option>
+                <option value="10">10 sonuç</option>
+            </select>
+            <button id="searchBtn"
+                    class="px-5 py-2.5 rounded-xl bg-primary text-white font-medium hover:bg-cyan-600 transition-colors text-sm whitespace-nowrap">
+                Ara
+            </button>
+        </div>
+
+
+        <div>
+            <p class="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">Hızlı Aramalar</p>
+            <div class="flex flex-wrap gap-2">
+                @{
+                    var quickSearches = new[]
+                    {
+                        new { Label = "Sigorta Haberleri",  Query = "sigorta sektörü son dakika haberleri" },
+                        new { Label = "Trafik Sigortası",   Query = "trafik sigortası fiyatları " + DateTime.Now.Year },
+                        new { Label = "Sağlık Sigortası",   Query = "özel sağlık sigortası kampanyaları" },
+                        new { Label = "Kasko",              Query = "kasko fiyat hesaplama" },
+                        new { Label = "DASK",               Query = "dask fiyatları " + DateTime.Now.Year },
+                        new { Label = "Konut Sigortası",    Query = "konut sigortası zorunlu mu" },
+                        new { Label = "AI + Sigorta",       Query = "yapay zeka sigorta sektörü" },
+                        new { Label = "Hasar İhbarı",       Query = "hasar ihbarı nasıl yapılır" }
+                    };
+                }
+                @foreach (var qs in quickSearches)
+                {
+                    <button class="quick-search px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium hover:bg-primary hover:text-white transition-colors"
+                            data-query="@qs.Query">
+                        @qs.Label
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+
+    <div id="resultsPanel" class="hidden space-y-4">
+
+
+        <div class="flex items-center justify-between text-sm text-slate-500">
+            <span>"<strong id="queryDisplay"></strong>" için sonuçlar</span>
+            <span id="responseTime"></span>
+        </div>
+
+
+        <div id="loadingIndicator" class="hidden bg-white rounded-2xl border border-slate-200 p-10 text-center">
+            <div class="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p class="text-slate-500 text-sm">Tavily AI web'de arama yapıyor…</p>
+        </div>
+
+
+        <div id="errorBox" class="hidden bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl px-5 py-4 text-sm"></div>
+
+
+        <div id="answerBox" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-primary">smart_toy</span>
+                <h3 class="font-semibold text-slate-800 text-sm">Tavily AI Özeti</h3>
+            </div>
+            <p id="answerText" class="text-slate-600 text-sm leading-relaxed"></p>
+        </div>
+
+
+        <div id="resultsList" class="space-y-3"></div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var token = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
+
+            function buildData(extra) {
+                return $.extend({ __RequestVerificationToken: token }, extra);
+            }
+
+            function performSearch() {
+                var query = $.trim($("#searchQuery").val());
+                var maxResults = parseInt($("#maxResults").val(), 10);
+
+                if (!query) {
+                    alert("Lütfen bir arama sorgusu girin.");
+                    return;
+                }
+
+                // UI reset
+                $("#resultsPanel").removeClass("hidden");
+                $("#loadingIndicator").removeClass("hidden");
+                $("#errorBox, #answerBox").addClass("hidden");
+                $("#resultsList").empty();
+                $("#queryDisplay").text(query);
+                $("#responseTime").text("");
+                $("#searchBtn").prop("disabled", true).text("Aranıyor…");
+
+                $.ajax({
+                    url: '@Url.Action("Search", "TavilySearch", new { area = "Admin" })',
+                    type: "POST",
+                    data: buildData({ query: query, maxResults: maxResults }),
+
+                    success: function (r) {
+                        $("#loadingIndicator").addClass("hidden");
+                        $("#searchBtn").prop("disabled", false).text("Ara");
+
+                        if (!r.success) {
+                            $("#errorBox").removeClass("hidden").text(r.message || "Arama başarısız.");
+                            return;
+                        }
+
+                        var data = r.data;
+
+                        // RESPONSE TIME
+                        if (data.ResponseTime) {
+                            $("#responseTime").text("Yanıt süresi: " + data.ResponseTime.toFixed(2) + " s");
+                        }
+
+                        // AI ANSWER
+                        if (data.Answer) {
+                            $("#answerText").text(data.Answer);
+                            $("#answerBox").removeClass("hidden");
+                        }
+
+                        // RESULTS
+                        if (data.Results && data.Results.length > 0) {
+
+                            $.each(data.Results, function (i, item) {
+
+                                // 🔥 FIXED (case sensitive)
+                                var score = item.Score ? Math.round(item.Score * 100) : 0;
+
+                                var preview = item.Content && item.Content.length > 220
+                                    ? item.Content.substring(0, 220) + "…"
+                                    : (item.Content || "");
+
+                                var title = item.Title || "Başlık yok";
+                                var url = item.Url || "#";
+
+                                var card = `
+                                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:border-primary/50 transition-colors">
+                                        <div class="flex items-start justify-between gap-3 mb-2">
+                                            <a href="${url}" target="_blank" rel="noopener"
+                                               class="font-semibold text-slate-800 text-sm hover:text-primary transition-colors">
+                                                ${title}
+                                            </a>
+                                            <span class="shrink-0 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                                                %${score}
+                                            </span>
+                                        </div>
+
+                                        <p class="text-slate-500 text-xs mb-2 leading-relaxed">
+                                            ${preview}
+                                        </p>
+
+                                        <a href="${url}" target="_blank" rel="noopener"
+                                           class="text-xs text-slate-400 hover:text-primary truncate block">
+                                            ${url}
+                                        </a>
+                                    </div>
+                                `;
+
+                                $("#resultsList").append(card);
+                            });
+
+                        } else {
+                            $("#resultsList").html(`
+                                <div class="bg-amber-50 border border-amber-200 text-amber-700 rounded-2xl px-5 py-4 text-sm">
+                                    Sonuç bulunamadı.
+                                </div>
+                            `);
+                        }
+                    },
+
+                    error: function () {
+                        $("#loadingIndicator").addClass("hidden");
+                        $("#searchBtn").prop("disabled", false).text("Ara");
+                        $("#errorBox").removeClass("hidden").text("Sunucu hatası oluştu.");
+                    }
+                });
+            }
+
+            $("#searchBtn").click(performSearch);
+
+            $("#searchQuery").keypress(function (e) {
+                if (e.which === 13) performSearch();
+            });
+
+            $(".quick-search").click(function () {
+                $("#searchQuery").val($(this).data("query"));
+                performSearch();
+            });
+        });
+    </script>
+}

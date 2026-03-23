@@ -5,93 +5,84 @@
     ViewBag.BreadcrumbTitle = "Veri Listesi";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
+
 <div class="p-8 space-y-6">
+
+    <!-- Başlık Kartı -->
     <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
         <h1 class="text-2xl font-bold">@ViewBag.PageTitle</h1>
-        <p class="mt-1 text-sm text-white/90">Yönetim ekranı temayla uyumlu olacak şekilde güncellendi.</p>
+        <p class="mt-1 text-sm text-white/90">
+            Yönetim ekranı temayla uyumlu şekilde güncellendi.
+        </p>
     </div>
-</div>
 
-<style>
-    .card {
-        border-radius: 1rem;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 2px rgba(15,23,42,.06)
-    }
-
-    .card-header {
-        border-top-left-radius: 1rem !important;
-        border-top-right-radius: 1rem !important;
-        background: linear-gradient(90deg,#0ea5e9,#06b6d4) !important;
-        color: #fff !important;
-        border-bottom: 1px solid #e2e8f0
-    }
-
-    .table-light {
-        background: #f8fafc !important
-    }
-</style>
-<div class="card">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="fas fa-database me-2"></i>Poliçe Satış Verileri</h5>
-        <div>
-            <a href="@Url.Action("Index")" class="btn btn-light btn-sm">
-                <i class="fas fa-arrow-left me-2"></i>Geri Dön
+    <!-- Veri Tablosu Kartı -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="flex justify-between items-center bg-gradient-to-r from-primary to-cyan-500 p-4 text-white">
+            <h5 class="font-semibold flex items-center gap-2">
+                <i class="fas fa-database"></i> Poliçe Satış Verileri
+            </h5>
+            <a href="@Url.Action("Index")"
+               class="px-4 py-2 bg-white text-primary font-medium rounded-xl hover:bg-slate-100 transition">
+                <i class="fas fa-arrow-left me-1"></i> Geri Dön
             </a>
         </div>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover" id="dataTable">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Şehir</th>
-                        <th>Tarih</th>
-                        <th>Satış Sayısı</th>
-                        <th>Toplam Prim</th>
-                        <th>Yıl-Ay</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var item in Model)
+        <div class="p-4">
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full border border-slate-200 text-sm text-left">
+                    <thead class="bg-slate-100 text-slate-700 uppercase text-xs">
+                        <tr>
+                            <th class="px-4 py-2">ID</th>
+                            <th class="px-4 py-2">Şehir</th>
+                            <th class="px-4 py-2">Tarih</th>
+                            <th class="px-4 py-2">Satış Sayısı</th>
+                            <th class="px-4 py-2">Toplam Prim</th>
+                            <th class="px-4 py-2">Yıl-Ay</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="px-4 py-2">@item.Id</td>
+                                    <td class="px-4 py-2">@item.City</td>
+                                    <td class="px-4 py-2">@item.SaleDate.ToString("dd.MM.yyyy")</td>
+                                    <td class="px-4 py-2">@item.SaleCount</td>
+                                    <td class="px-4 py-2">@item.TotalPremium.ToString("C0")</td>
+                                    <td class="px-4 py-2">@item.YearMonth</td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>@item.Id</td>
-                                <td>@item.City</td>
-                                <td>@item.SaleDate.ToString("dd.MM.yyyy")</td>
-                                <td>@item.SaleCount</td>
-                                <td>@item.TotalPremium.ToString("C0")</td>
-                                <td>@item.YearMonth</td>
+                                <td colspan="6" class="px-4 py-6 text-center text-slate-400">
+                                    Henüz veri bulunmuyor.
+                                </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
-                                Henüz veri bulunmuyor.
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+
 </div>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
             $('#dataTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
-                },
-                order: [[0, 'desc']]
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json' },
+                order: [[0, 'desc']],
+                stripeClasses: [],
+                pagingType: "simple_numbers",
+                columnDefs: [
+                    { targets: "_all", className: 'align-middle' }
+                ]
             });
         });
     </script>
 }
-
