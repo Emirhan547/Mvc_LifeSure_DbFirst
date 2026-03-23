@@ -17,7 +17,13 @@ namespace Mvc_LifeSure_DbFirst.Repositories.PolicyRepositories
         {
             _context = context;
         }
-
+        public List<Policy> GetAllWithDetails()
+        {
+            return _context.Policies
+                .Include(x => x.User)
+                .Include(x => x.InsurancePackage)
+                .ToList();
+        }
         public Policy GetPolicyWithDetails(int id)
         {
             return _context.Policies

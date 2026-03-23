@@ -1,225 +1,287 @@
-﻿@{
+﻿@using System.Collections.Generic
+@using System.Linq
+@model Mvc_LifeSure_DbFirst.Dtos.DashboardDtos.AdminDashboardViewModel
+
+@{
     ViewBag.Title = "Dashboard";
     ViewBag.PageTitle = "Dashboard";
     ViewBag.BreadcrumbTitle = "Ana Sayfa";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var cityDistribution = Model.CityDistribution ?? new Dictionary<string, int>();
+    var premiumDistribution = Model.PremiumDistribution ?? new Dictionary<string, decimal>();
 }
 
-<div class="row g-4 mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-white-50 mb-2">Toplam Kullanıcı</h6>
-                        <h3 class="text-white mb-0">@ViewBag.TotalUsers</h3>
-                    </div>
-                    <div class="icon-circle bg-white-20">
-                        <i class="fas fa-users fa-2x"></i>
-                    </div>
+<div class="p-8 space-y-6">
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">Operasyon Dashboard'u</h1>
+                <p class="mt-1 text-sm text-white/90">
+                    Admin panelindeki kullanıcı, poliçe, gelir ve operasyon trafiğini tek ekranda izleyin.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <a href="@Url.Action("Index", "PolicyManagement")"
+                   class="rounded-xl bg-white/15 px-4 py-3 font-medium text-white hover:bg-white/20 transition-colors">
+                    Poliçe Yönetimi
+                </a>
+                <a href="@Url.Action("Index", "UserManagement")"
+                   class="rounded-xl bg-white/15 px-4 py-3 font-medium text-white hover:bg-white/20 transition-colors">
+                    Kullanıcı Yönetimi
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500">Toplam Kullanıcı</p>
+            <p class="mt-3 text-3xl font-bold text-slate-800">@Model.TotalUsers</p>
+            <p class="mt-2 text-xs text-slate-500">Sistemde tanımlı tüm kullanıcılar</p>
+        </div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500">Aktif Poliçeler</p>
+            <p class="mt-3 text-3xl font-bold text-slate-800">@Model.ActivePolicies / @Model.TotalPolicies</p>
+            <p class="mt-2 text-xs text-slate-500">Süresi dolmamış poliçeler</p>
+        </div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500">30 Gün İçinde Bitecek</p>
+            <p class="mt-3 text-3xl font-bold text-amber-600">@Model.ExpiringPolicies</p>
+            <p class="mt-2 text-xs text-slate-500">Yenileme takibi gerektiren poliçeler</p>
+        </div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500">Toplam Prim / Ort. Prim</p>
+            <p class="mt-3 text-2xl font-bold text-slate-800">@Model.TotalPremium.ToString("C0")</p>
+            <p class="mt-2 text-xs text-slate-500">
+                Ortalama: @Model.AveragePremium.ToString("C0")
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div class="xl:col-span-2 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+            <div class="border-b border-slate-200 px-5 py-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-800">Poliçe ve gelir görünümü</h2>
+                    <p class="text-sm text-slate-500">Şehir bazlı hacim ve prim dağılımı</p>
                 </div>
             </div>
-            <div class="card-footer bg-transparent border-0">
-                <small class="text-white-50">
-                    <i class="fas fa-arrow-up me-1"></i>aktif kullanıcılar
-                </small>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card bg-success text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-white-50 mb-2">Toplam Poliçe</h6>
-                        <h3 class="text-white mb-0">@ViewBag.TotalPolicies</h3>
-                    </div>
-                    <div class="icon-circle bg-white-20">
-                        <i class="fas fa-file-contract fa-2x"></i>
-                    </div>
+            <div class="grid grid-cols-1 gap-6 p-5 lg:grid-cols-2">
+                <div>
+                    <h3 class="mb-3 text-sm font-semibold text-slate-700">
+                        Şehir Bazlı Poliçe Dağılımı
+                    </h3>
+                    <canvas id="cityChart" style="max-height: 280px;"></canvas>
+                </div>
+                <div>
+                    <h3 class="mb-3 text-sm font-semibold text-slate-700">
+                        Şehir Bazlı Prim Tutarı
+                    </h3>
+                    <canvas id="premiumChart" style="max-height: 280px;"></canvas>
                 </div>
             </div>
-            <div class="card-footer bg-transparent border-0">
-                <small class="text-white-50">
-                    <i class="fas fa-arrow-up me-1"></i>aktif poliçeler
-                </small>
-            </div>
         </div>
-    </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card bg-info text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-white-50 mb-2">Aktif Paketler</h6>
-                        <h3 class="text-white mb-0">@ViewBag.ActivePackages</h3>
-                    </div>
-                    <div class="icon-circle bg-white-20">
-                        <i class="fas fa-box fa-2x"></i>
-                    </div>
+        <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+            <div class="border-b border-slate-200 px-5 py-4">
+                <h2 class="text-lg font-semibold text-slate-800">Operasyon özeti</h2>
+            </div>
+
+            <div class="space-y-4 p-5">
+                <div class="rounded-xl bg-slate-50 p-4">
+                    <p class="text-sm text-slate-500">Aktif Paketler</p>
+                    <p class="mt-1 text-2xl font-bold text-slate-800">
+                        @Model.ActivePackages / @Model.TotalPackages
+                    </p>
+                </div>
+
+                <div class="rounded-xl bg-slate-50 p-4">
+                    <p class="text-sm text-slate-500">Son 8 İşlem</p>
+                    <p class="mt-1 text-2xl font-bold text-slate-800">
+                        @Model.RecentLogs.Count
+                    </p>
+                </div>
+
+                <div class="rounded-xl bg-amber-50 border border-amber-100 p-4">
+                    <p class="text-sm font-medium text-amber-700">Yenileme odağı</p>
+                    <p class="mt-1 text-sm text-amber-800">
+                        Önümüzdeki 30 günde biten poliçeler için yenileme aksiyonu planlanmalı.
+                    </p>
                 </div>
             </div>
-            <div class="card-footer bg-transparent border-0">
-                <small class="text-white-50">
-                    <i class="fas fa-arrow-up me-1"></i>toplam @ViewBag.TotalPackages paket
-                </small>
-            </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card bg-warning text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-white-50 mb-2">Toplam Prim</h6>
-                        <h3 class="text-white mb-0">@ViewBag.TotalPremium.ToString("C0")</h3>
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+            <div class="border-b border-slate-200 px-5 py-4 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-slate-800">Yakında bitecek poliçeler</h2>
+                <a href="@Url.Action("Index", "PolicyManagement")" class="text-sm font-medium text-primary">
+                    Tümünü Gör
+                </a>
+            </div>
+
+            <div class="divide-y divide-slate-100">
+                @if (Model.ExpiringPolicyList.Any())
+                {
+                    foreach (var policy in Model.ExpiringPolicyList)
+                    {
+                        <div class="flex items-center justify-between px-5 py-4">
+                            <div>
+                                <p class="font-medium text-slate-800">
+                                    @policy.PolicyNumber - @policy.UserFullName
+                                </p>
+                                <p class="text-sm text-slate-500">@policy.PackageName</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-semibold text-amber-600">
+                                    @policy.EndDate.ToString("dd.MM.yyyy")
+                                </p>
+                                <p class="text-xs text-slate-500">
+                                    @policy.PremiumAmount.ToString("C0")
+                                </p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="px-5 py-8 text-sm text-slate-500">
+                        Önümüzdeki 30 gün içinde bitecek poliçe bulunmuyor.
                     </div>
-                    <div class="icon-circle bg-white-20">
-                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                }
+            </div>
+        </div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+            <div class="border-b border-slate-200 px-5 py-4 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-slate-800">Son işlem logları</h2>
+                <span class="text-sm text-slate-500">@Model.RecentLogs.Count kayıt</span>
+            </div>
+
+            <div class="divide-y divide-slate-100">
+                @if (Model.RecentLogs.Any())
+                {
+                    foreach (var log in Model.RecentLogs)
+                    {
+                        <div class="px-5 py-4">
+                            <div class="flex items-center justify-between gap-3">
+                                <p class="font-medium text-slate-800">
+                                    @(string.IsNullOrWhiteSpace(log.UserName) ? "Sistem" : log.UserName)
+                                </p>
+                                <span class="text-xs text-slate-500">
+                                    @log.Timestamp.ToString("dd.MM.yyyy HH:mm")
+                                </span>
+                            </div>
+                            <p class="mt-1 text-sm text-slate-600">@log.Action</p>
+                            <p class="mt-1 text-xs text-slate-400">
+                                @log.TableName / @log.ActionType
+                            </p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="px-5 py-8 text-sm text-slate-500">
+                        Henüz log kaydı yok.
                     </div>
-                </div>
-            </div>
-            <div class="card-footer bg-transparent border-0">
-                <small class="text-white-50">
-                    <i class="fas fa-arrow-up me-1"></i>toplam prim tutarı
-                </small>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-4">
-    <div class="col-xl-6">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Şehir Bazlı Poliçe Dağılımı</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="cityChart" style="max-height: 300px;"></canvas>
+                }
             </div>
         </div>
     </div>
 
-    <div class="col-xl-6">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Son İşlem Logları</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Kullanıcı</th>
-                                <th>İşlem</th>
-                                <th>Tarih</th>
+    <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+        <div class="border-b border-slate-200 px-5 py-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800">Son poliçeler</h2>
+            <a href="@Url.Action("Index", "PolicyManagement")" class="text-sm font-medium text-primary">
+                Poliçelere Git
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="px-5 py-3 text-left font-semibold">Poliçe</th>
+                        <th class="px-5 py-3 text-left font-semibold">Müşteri</th>
+                        <th class="px-5 py-3 text-left font-semibold">Paket</th>
+                        <th class="px-5 py-3 text-left font-semibold">Başlangıç</th>
+                        <th class="px-5 py-3 text-left font-semibold">Prim</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.RecentPolicies.Any())
+                    {
+                        foreach (var policy in Model.RecentPolicies)
+                        {
+                            <tr class="border-t border-slate-100">
+                                <td class="px-5 py-3 text-slate-700">@policy.PolicyNumber</td>
+                                <td class="px-5 py-3 text-slate-700">@policy.UserFullName</td>
+                                <td class="px-5 py-3 text-slate-700">@policy.PackageName</td>
+                                <td class="px-5 py-3 text-slate-700">@policy.StartDate.ToString("dd.MM.yyyy")</td>
+                                <td class="px-5 py-3 text-slate-700">@policy.PremiumAmount.ToString("C0")</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @if (ViewBag.RecentLogs != null && ViewBag.RecentLogs.Count > 0)
-                            {
-                                foreach (var log in ViewBag.RecentLogs)
-                                {
-                                    <tr>
-                                        <td>@log.UserName</td>
-                                        <td>@log.Action</td>
-                                        <td>@log.Timestamp.ToString("dd.MM.yyyy HH:mm")</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="3" class="text-center text-muted py-3">Henüz log kaydı yok</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Son Poliçeler</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Poliçe No</th>
-                                <th>Müşteri</th>
-                                <th>Paket</th>
-                                <th>Başlangıç</th>
-                                <th>Prim</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (ViewBag.RecentPolicies != null && ViewBag.RecentPolicies.Count > 0)
-                            {
-                                foreach (var policy in ViewBag.RecentPolicies)
-                                {
-                                    <tr>
-                                        <td>@policy.PolicyNumber</td>
-                                        <td>@policy.UserFullName</td>
-                                        <td>@policy.PackageName</td>
-                                        <td>@policy.StartDate.ToString("dd.MM.yyyy")</td>
-                                        <td>@policy.PremiumAmount.ToString("C0")</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted py-3">Henüz poliçe kaydı yok</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="px-5 py-8 text-center text-slate-500">
+                                Henüz poliçe kaydı yok.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        $(document).ready(function() {
-            var ctx = document.getElementById('cityChart').getContext('2d');
-            var cityData = @Html.Raw(Json.Encode(ViewBag.CityDistribution));
+        $(function () {
+            var cityData = @Html.Raw(Json.Encode(cityDistribution));
+            var premiumData = @Html.Raw(Json.Encode(premiumDistribution));
 
-            var cities = Object.keys(cityData);
-            var counts = Object.values(cityData);
-
-            new Chart(ctx, {
-                type: 'pie',
+            new Chart(document.getElementById('cityChart'), {
+                type: 'doughnut',
                 data: {
-                    labels: cities,
+                    labels: Object.keys(cityData),
                     datasets: [{
-                        data: counts,
-                        backgroundColor: [
-                            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
-                            '#5a5c69', '#858796', '#6f42c1', '#fd7e14', '#20c9a6'
-                        ]
+                        data: Object.values(cityData),
+                        backgroundColor: ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6']
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            new Chart(document.getElementById('premiumChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(premiumData),
+                    datasets: [{
+                        label: 'Prim Tutarı',
+                        data: Object.values(premiumData),
+                        backgroundColor: '#1193d4',
+                        borderRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         });

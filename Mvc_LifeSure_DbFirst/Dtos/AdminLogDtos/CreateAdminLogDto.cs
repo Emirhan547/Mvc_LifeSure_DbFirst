@@ -13,5 +13,6 @@ namespace Mvc_LifeSure_DbFirst.Dtos.AdminLogDtos
         public string TableName { get; set; }
         public int? RecordId { get; set; }
         public string IpAddress { get; set; }
+        public string AdminUserName { get; set; }
     }
 }

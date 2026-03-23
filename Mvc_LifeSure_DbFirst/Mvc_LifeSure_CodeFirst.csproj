@@ -326,6 +326,7 @@
     <Compile Include="Dtos\BlogDtos\UpdateBlogDto.cs" />
     <Compile Include="Dtos\ContactMessageDtos\CreateContactMessageDto.cs" />
     <Compile Include="Dtos\ContactMessageDtos\ResultContactMessageDto.cs" />
+    <Compile Include="Dtos\DashboardDtos\AdminDashboardViewModel.cs" />
     <Compile Include="Dtos\FaqDtos\CreateFaqDto.cs" />
     <Compile Include="Dtos\FaqDtos\ResultFaqDto.cs" />
     <Compile Include="Dtos\FaqDtos\UpdateFaqDto.cs" />

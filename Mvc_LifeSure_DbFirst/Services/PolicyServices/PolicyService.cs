@@ -28,44 +28,26 @@ namespace Mvc_LifeSure_DbFirst.Services.PolicyServices
 
         public List<ResultPolicyDto> GetAll()
         {
-            var policies = _policyRepository.GetAll();
-            var result = new List<ResultPolicyDto>();
-
-            foreach (var policy in policies)
-            {
-                var policyWithDetails = _policyRepository.GetPolicyWithDetails(policy.Id);
-                if (policyWithDetails != null)
-                    result.Add(MapToResultDto(policyWithDetails));
-            }
-
-            return result;
+            return _policyRepository.GetAllWithDetails()
+                 .Select(MapToResultDto)
+                 .ToList();
         }
 
         public List<ResultPolicySimpleDto> GetAllSimple()
         {
-            var policies = _policyRepository.GetAll();
-            var result = new List<ResultPolicySimpleDto>();
-
-            foreach (var policy in policies)
-            {
-                var policyWithDetails = _policyRepository.GetPolicyWithDetails(policy.Id);
-                if (policyWithDetails != null)
-                {
-                    result.Add(new ResultPolicySimpleDto
-                    {
-                        Id = policy.Id,
-                        PolicyNumber = policy.PolicyNumber,
-                        StartDate = policy.StartDate,
-                        PremiumAmount = policy.PremiumAmount,
-                        UserFullName = policyWithDetails.User != null
-                            ? $"{policyWithDetails.User.FirstName} {policyWithDetails.User.LastName}"
-                            : "Belirtilmemiş",
-                        PackageName = policyWithDetails.InsurancePackage?.PackageName
-                    });
-                }
-            }
-
-            return result;
+            return _policyRepository.GetAllWithDetails()
+                 .Select(policy => new ResultPolicySimpleDto
+                 {
+                     Id = policy.Id,
+                     PolicyNumber = policy.PolicyNumber,
+                     StartDate = policy.StartDate,
+                     PremiumAmount = policy.PremiumAmount,
+                     UserFullName = policy.User != null
+                        ? $"{policy.User.FirstName} {policy.User.LastName}"
+                        : "Belirtilmemiş",
+                     PackageName = policy.InsurancePackage?.PackageName
+                 })
+                .ToList();
         }
 
         public ResultPolicyDto GetById(int id)
@@ -169,18 +151,16 @@ namespace Mvc_LifeSure_DbFirst.Services.PolicyServices
 
         public Dictionary<string, int> GetPolicyCountByCity()
         {
-            var policies = _policyRepository.GetAll();
-            return policies
-                .GroupBy(p => p.User?.City ?? "Bilinmiyor")      // Customer yerine User
-                .ToDictionary(g => g.Key, g => g.Count());
+            return _policyRepository.GetAllWithDetails()
+                 .GroupBy(p => p.User?.City ?? "Bilinmiyor")     // Customer yerine User
+                 .ToDictionary(g => g.Key, g => g.Count());
         }
 
         public Dictionary<string, decimal> GetTotalPremiumByCity()
         {
-            var policies = _policyRepository.GetAll();
-            return policies
-                .GroupBy(p => p.User?.City ?? "Bilinmiyor")      // Customer yerine User
-                .ToDictionary(g => g.Key, g => g.Sum(p => p.PremiumAmount));
+            return _policyRepository.GetAllWithDetails()
+                 .GroupBy(p => p.User?.City ?? "Bilinmiyor")     // Customer yerine User
+                 .ToDictionary(g => g.Key, g => g.Sum(p => p.PremiumAmount));
         }
 
         public string GeneratePolicyNumber()

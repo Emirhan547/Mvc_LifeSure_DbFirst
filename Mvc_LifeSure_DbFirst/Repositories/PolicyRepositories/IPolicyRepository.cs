@@ -9,6 +9,7 @@ namespace Mvc_LifeSure_DbFirst.Repositories.PolicyRepositories
 {
     public interface IPolicyRepository : IRepository<Policy>
     {
+        List<Policy> GetAllWithDetails();
         Policy GetPolicyWithDetails(int id);
         List<Policy> GetPoliciesByUser(string userId);                    // string oldu
         List<Policy> GetPoliciesByPackage(int packageId);

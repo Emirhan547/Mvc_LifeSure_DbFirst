@@ -29,10 +29,56 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             _packageService = packageService;
         }
 
-        public async Task<ActionResult> Index()
+        public ActionResult Index(string searchTerm, string city, string status, int? packageId)
         {
-            var policies = _policyService.GetAll();
-            return View(policies);
+            var allPolicies = _policyService.GetAll();
+            var policies = allPolicies;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                policies = policies.Where(x =>
+                    x.PolicyNumber.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    x.UserFullName.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    x.PackageName.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(city))
+            {
+                policies = policies.Where(x => string.Equals(x.UserCity, city, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (packageId.HasValue)
+            {
+                policies = policies.Where(x => x.InsurancePackageId == packageId.Value).ToList();
+            }
+
+            var today = DateTime.Today;
+            if (string.Equals(status, "active", StringComparison.OrdinalIgnoreCase))
+            {
+                policies = policies.Where(x => x.EndDate >= today).ToList();
+            }
+            else if (string.Equals(status, "expired", StringComparison.OrdinalIgnoreCase))
+            {
+                policies = policies.Where(x => x.EndDate < today).ToList();
+            }
+            else if (string.Equals(status, "expiring", StringComparison.OrdinalIgnoreCase))
+            {
+                policies = policies.Where(x => x.EndDate >= today && x.EndDate <= today.AddDays(30)).ToList();
+            }
+
+            ViewBag.TotalPolicyCount = policies.Count;
+            ViewBag.ActivePolicyCount = policies.Count(x => x.EndDate >= today);
+            ViewBag.ExpiredPolicyCount = policies.Count(x => x.EndDate < today);
+            ViewBag.ExpiringSoonCount = policies.Count(x => x.EndDate >= today && x.EndDate <= today.AddDays(30));
+            ViewBag.TotalPremium = policies.Sum(x => x.PremiumAmount);
+            ViewBag.Cities = allPolicies.Select(x => x.UserCity).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().OrderBy(x => x).ToList();
+            ViewBag.Packages = _packageService.GetActivePackages();
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.SelectedCity = city;
+            ViewBag.SelectedStatus = status;
+            ViewBag.SelectedPackageId = packageId;
+
+            return View(policies.OrderByDescending(x => x.CreatedAt).ToList());
         }
 
         public async Task<ActionResult> Create()
@@ -186,17 +232,12 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
 
         public ActionResult FilterByCity(string city)
         {
-            var policies = _policyService.GetPoliciesByCity(city);
-            ViewBag.City = city;
-            return View("Index", policies);
+            return RedirectToAction(nameof(Index), new { city });
         }
 
         public ActionResult FilterByDate(DateTime startDate, DateTime endDate)
         {
-            var policies = _policyService.GetPoliciesByDateRange(startDate, endDate);
-            ViewBag.StartDate = startDate;
-            ViewBag.EndDate = endDate;
-            return View("Index", policies);
+            return RedirectToAction(nameof(Index), new { startDate, endDate });
         }
     }
 }
