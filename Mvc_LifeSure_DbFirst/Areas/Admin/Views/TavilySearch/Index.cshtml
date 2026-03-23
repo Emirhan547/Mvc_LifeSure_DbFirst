@@ -4,17 +4,44 @@
     ViewBag.BreadcrumbTitle = "Web Arama";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
+<div class="p-8 space-y-6">
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+        <h1 class="text-2xl font-bold">@ViewBag.PageTitle</h1>
+        <p class="mt-1 text-sm text-white/90">Yönetim ekranı temayla uyumlu olacak şekilde güncellendi.</p>
+    </div>
+</div>
 
+<style>
+    .card {
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 2px rgba(15,23,42,.06)
+    }
+
+    .card-header {
+        border-top-left-radius: 1rem !important;
+        border-top-right-radius: 1rem !important;
+        background: linear-gradient(90deg,#0ea5e9,#06b6d4) !important;
+        color: #fff !important;
+        border-bottom: 1px solid #e2e8f0
+    }
+
+    .table-light {
+        background: #f8fafc !important
+    }
+</style>
 <style>
     .search-result {
         transition: all 0.3s ease;
         border-left: 4px solid transparent;
     }
-    .search-result:hover {
-        border-left-color: #0d6efd;
-        background-color: #f8f9fa;
-        transform: translateX(5px);
-    }
+
+        .search-result:hover {
+            border-left-color: #0d6efd;
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+
     .answer-box {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -22,14 +49,17 @@
         padding: 20px;
         margin-bottom: 20px;
     }
+
     .quick-search-btn {
         cursor: pointer;
         transition: all 0.2s ease;
     }
-    .quick-search-btn:hover {
-        transform: scale(1.05);
-        background-color: #e9ecef;
-    }
+
+        .quick-search-btn:hover {
+            transform: scale(1.05);
+            background-color: #e9ecef;
+        }
+
     .typing-indicator {
         display: inline-block;
         width: 20px;
@@ -39,8 +69,11 @@
         border-top-color: #fff;
         animation: spin 1s ease-in-out infinite;
     }
+
     @@keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+            transform: rotate(360deg);
+        }
     }
 </style>
 

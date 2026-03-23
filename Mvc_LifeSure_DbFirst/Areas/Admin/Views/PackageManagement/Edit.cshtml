@@ -6,20 +6,27 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="p-8">
-    <div class="max-w-2xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-        @using (Html.BeginForm())
-        {
-            @Html.AntiForgeryToken()
-            @Html.HiddenFor(x => x.Id)
-            <div class="space-y-4">
-                @Html.TextBoxFor(x => x.PackageName, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Paket Adı" })
-                @Html.TextAreaFor(x => x.Description, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Açıklama", rows = 4 })
-                @Html.TextBoxFor(x => x.BasePrice, new { @class = "w-full rounded-xl border-slate-300", type = "number", step = "0.01" })
-                @Html.TextBoxFor(x => x.CoveragePeriodMonths, new { @class = "w-full rounded-xl border-slate-300", type = "number" })
-                <label class="flex items-center gap-2">@Html.CheckBoxFor(x => x.IsActive) <span>Aktif</span></label>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-white">Güncelle</button>
+
+        <div class="p-8 space-y-6">
+            <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20 max-w-2xl">
+                <h1 class="text-2xl font-bold">Paket Düzenle</h1>
+                <p class="mt-1 text-sm text-white/90">Paket bilgilerini güncelleyerek içerikleri temaya uygun yönetin.</p>
             </div>
-        }
-    </div>
-</div>
+
+            <div class="max-w-2xl bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(x => x.Id)
+                    <div class="space-y-4">
+                        @Html.TextBoxFor(x => x.PackageName, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Paket Adı" })
+                        @Html.TextAreaFor(x => x.Description, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Açıklama", rows = 4 })
+                        @Html.TextBoxFor(x => x.BasePrice, new { @class = "w-full rounded-xl border-slate-300", type = "number", step = "0.01" })
+                        @Html.TextBoxFor(x => x.CoveragePeriodMonths, new { @class = "w-full rounded-xl border-slate-300", type = "number" })
+                        <label class="flex items-center gap-2 text-slate-600">@Html.CheckBoxFor(x => x.IsActive) <span>Aktif</span></label>
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-cyan-600 transition-colors">Güncelle</button>
+                    </div>
+                }
+            </div>
+        </div>
+   

@@ -8,15 +8,22 @@
     var roles = ViewBag.UserRoles as IList<string>;
 }
 
-<div class="p-8">
-    <div class="max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
-        <h2 class="text-xl font-semibold">@Model.FirstName @Model.LastName</h2>
-        <p><strong>Kullanıcı Adı:</strong> @Model.UserName</p>
-        <p><strong>Email:</strong> @Model.Email</p>
-        <p><strong>Telefon:</strong> @Model.PhoneNumber</p>
-        <p><strong>Şehir:</strong> @Model.City</p>
-        <p><strong>Poliçe Sayısı:</strong> @Model.PolicyCount</p>
-        <p><strong>Roller:</strong> @((roles != null && roles.Count > 0) ? string.Join(", ", roles) : "Rol yok")</p>
-        <a href="@Url.Action("Index")" class="inline-block mt-2 px-4 py-2 rounded-xl bg-primary text-white">Listeye Dön</a>
+
+        <div class="p-8 space-y-6">
+            <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20 max-w-3xl">
+                <h1 class="text-2xl font-bold">Kullanıcı Detayı</h1>
+                <p class="mt-1 text-sm text-white/90">Kullanıcının profil ve üyelik bilgileri.</p>
+            </div>
+        
+
+        <div class="max-w-3xl bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-3">
+            <h2 class="text-xl font-semibold text-slate-800">@Model.FirstName @Model.LastName</h2>
+            <p class="text-slate-600"><strong>Kullanıcı Adı:</strong> @Model.UserName</p>
+            <p class="text-slate-600"><strong>Email:</strong> @Model.Email</p>
+            <p class="text-slate-600"><strong>Telefon:</strong> @Model.PhoneNumber</p>
+            <p class="text-slate-600"><strong>Şehir:</strong> @Model.City</p>
+            <p class="text-slate-600"><strong>Poliçe Sayısı:</strong> @Model.PolicyCount</p>
+            <p class="text-slate-600"><strong>Roller:</strong> @((roles != null && roles.Count > 0) ? string.Join(", ", roles) : "Rol yok")</p>
+            <a href="@Url.Action("Index")" class="inline-flex mt-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-cyan-600 transition-colors">Listeye Dön</a>
+        </div>
     </div>
-</div>

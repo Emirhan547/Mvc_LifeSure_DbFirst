@@ -6,8 +6,13 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="p-8">
-    <div class="max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+<div class="p-8 space-y-6">
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20 max-w-3xl">
+        <h1 class="text-2xl font-bold">Kullanıcı Düzenle</h1>
+        <p class="mt-1 text-sm text-white/90">Kullanıcı bilgilerini güncelleyin.</p>
+    </div>
+
+    <div class="max-w-3xl bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
         @using (Html.BeginForm())
         {
             @Html.AntiForgeryToken()
@@ -20,9 +25,7 @@
                 @Html.TextBoxFor(x => x.PhoneNumber, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Telefon" })
                 @Html.TextBoxFor(x => x.City, new { @class = "w-full rounded-xl border-slate-300", placeholder = "Şehir" })
                 @Html.TextBoxFor(x => x.BirthDate, "{0:yyyy-MM-dd}", new { @class = "w-full rounded-xl border-slate-300", type = "date" })
-                <label class="flex items-center gap-2">@Html.CheckBoxFor(x => x.IsActive) <span>Aktif</span></label>
-            </div>
-            <button type="submit" class="mt-4 px-4 py-2 rounded-xl bg-primary text-white">Güncelle</button>
-        }
+                <label class="flex items-center gap-2 text-slate-600">@Html.CheckBoxFor(x => x.IsActive) <span>Aktif</span></label>            </div>
+            <button type="submit" class="mt-5 px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-cyan-600 transition-colors">Güncelle</button>        }
     </div>
 </div>

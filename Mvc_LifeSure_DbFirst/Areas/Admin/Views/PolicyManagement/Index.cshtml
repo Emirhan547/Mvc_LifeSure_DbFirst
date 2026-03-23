@@ -7,31 +7,47 @@
 }
 
 <div class="p-8 space-y-6">
-    <div class="flex justify-between items-center">
-        <h2 class="text-xl font-semibold">Poliçe Listesi</h2>
-        <a href="@Url.Action("Create")" class="px-4 py-2 rounded-xl bg-primary text-white">Yeni Poliçe</a>
-    </div>
-    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <table class="w-full min-w-[1000px] text-sm">
-            <thead class="bg-slate-50 dark:bg-slate-800 text-left"><tr><th class="px-4 py-3">No</th><th class="px-4 py-3">Müşteri</th><th class="px-4 py-3">Paket</th><th class="px-4 py-3">Prim</th><th class="px-4 py-3">Bitiş</th><th class="px-4 py-3 text-right">İşlem</th></tr></thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr class="border-t border-slate-100 dark:border-slate-800">
-                        <td class="px-4 py-3">@item.PolicyNumber</td>
-                        <td class="px-4 py-3">@item.UserFullName</td>
-                        <td class="px-4 py-3">@item.PackageName</td>
-                        <td class="px-4 py-3">@item.PremiumAmount.ToString("C")</td>
-                        <td class="px-4 py-3">@item.EndDate.ToString("dd.MM.yyyy")</td>
-                        <td class="px-4 py-3"><div class="flex justify-end gap-2"><a href="@Url.Action("Details", new { id = item.Id })" class="px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700">Detay</a><a href="@Url.Action("Edit", new { id = item.Id })" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700">Düzenle</a><button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 delete-btn" data-id="@item.Id">Sil</button></div></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
-@section Scripts {
-    <script>
+   
+        <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+            <h1 class="text-2xl font-bold">Poliçe Yönetimi</h1>
+            <p class="mt-1 text-sm text-white/90">Aktif poliçeleri listeleyin, güncelleyin ve yeni poliçe oluşturun.</p>
+        </div>
+       
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-slate-800">Poliçe Listesi</h2>
+                    <a href="@Url.Action("Create")" class="px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-cyan-600 transition-colors">Yeni Poliçe</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[1000px] text-sm">
+                        <thead class="bg-slate-50 text-left text-slate-700 font-semibold"><tr><th class="px-4 py-3">No</th><th class="px-4 py-3">Müşteri</th><th class="px-4 py-3">Paket</th><th class="px-4 py-3">Prim</th><th class="px-4 py-3">Bitiş</th><th class="px-4 py-3 text-right">İşlem</th></tr></thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr class="border-t border-slate-100 hover:bg-slate-50/70">
+                                        <td class="px-4 py-3 text-slate-600">@item.PolicyNumber</td>
+                                        <td class="px-4 py-3 text-slate-600">@item.UserFullName</td>
+                                        <td class="px-4 py-3 text-slate-600">@item.PackageName</td>
+                                        <td class="px-4 py-3 text-slate-600">@item.PremiumAmount.ToString("C")</td>
+                                        <td class="px-4 py-3 text-slate-600">@item.EndDate.ToString("dd.MM.yyyy")</td>
+                                        <td class="px-4 py-3"><div class="flex justify-end gap-2"><a href="@Url.Action("Details", new { id = item.Id })" class="px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700 font-medium">Detay</a><a href="@Url.Action("Edit", new { id = item.Id })" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 font-medium">Düzenle</a><button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium delete-btn" data-id="@item.Id">Sil</button></div></td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="6" class="px-4 py-10 text-center text-slate-500">Henüz poliçe bulunmuyor.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @section Scripts {
+            <script>
 $(function(){ $('.delete-btn').click(function(){ if(!confirm('Poliçe silinsin mi?')) return; $.post('@Url.Action("Delete")',{id:$(this).data('id')},function(r){ if(r.success) location.reload(); else alert(r.message||'Hata');});});});
-    </script>
-}
+            </script>
+        }
+        

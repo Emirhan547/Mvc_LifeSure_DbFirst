@@ -6,14 +6,21 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="p-8">
-    <div class="max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
-        <h2 class="text-xl font-semibold">@Model.PackageName</h2>
-        <p><strong>Açıklama:</strong> @Model.Description</p>
-        <p><strong>Fiyat:</strong> @Model.BasePrice.ToString("C")</p>
-        <p><strong>Kapsam:</strong> @Model.CoveragePeriodMonths Ay</p>
-        <p><strong>Poliçe Sayısı:</strong> @Model.PolicyCount</p>
-        <p><strong>Durum:</strong> @(Model.IsActive ? "Aktif" : "Pasif")</p>
-        <a href="@Url.Action("Index")" class="inline-block mt-2 px-4 py-2 rounded-xl bg-primary text-white">Listeye Dön</a>
+
+        <div class="p-8 space-y-6">
+            <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20 max-w-3xl">
+                <h1 class="text-2xl font-bold">Paket Detayı</h1>
+                <p class="mt-1 text-sm text-white/90">Paketin kapsam, fiyat ve kullanım bilgileri.</p>
+            </div>
+      
+
+        <div class="max-w-3xl bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-2">
+            <h2 class="text-xl font-semibold text-slate-800">@Model.PackageName</h2>
+            <p class="text-slate-600"><strong>Açıklama:</strong> @Model.Description</p>
+            <p class="text-slate-600"><strong>Fiyat:</strong> @Model.BasePrice.ToString("C")</p>
+            <p class="text-slate-600"><strong>Kapsam:</strong> @Model.CoveragePeriodMonths Ay</p>
+            <p class="text-slate-600"><strong>Poliçe Sayısı:</strong> @Model.PolicyCount</p>
+            <p class="text-slate-600"><strong>Durum:</strong> @(Model.IsActive ? "Aktif" : "Pasif")</p>
+            <a href="@Url.Action("Index")" class="inline-flex mt-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-cyan-600 transition-colors">Listeye Dön</a>
+        </div>
     </div>
-</div>

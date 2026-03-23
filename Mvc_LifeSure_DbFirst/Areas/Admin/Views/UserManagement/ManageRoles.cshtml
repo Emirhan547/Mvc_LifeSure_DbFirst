@@ -11,40 +11,41 @@
     var allRoles = ViewBag.AllRoles as IList<string>;
 }
 
-<div class="p-8 space-y-6">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-        <h2 class="text-xl font-semibold">@userName için Rol Yönetimi</h2>
-        <p class="text-sm text-slate-500 mt-1">Kullanıcıya rol ekleyip çıkarabilirsiniz.</p>
-    </div>
 
-    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-        <h3 class="font-semibold mb-3">Mevcut Roller</h3>
-        <div class="flex flex-wrap gap-2 mb-4">
-            @if (userRoles != null && userRoles.Any())
-            {
-                foreach (var role in userRoles)
-                {
-                    <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 remove-role" data-role="@role">@role (Kaldır)</button>
-                }
-            }
-            else
-            {
-                <span class="text-slate-500">Rol bulunmuyor.</span>
-            }
+        <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+            <h1 class="text-2xl font-bold">Rol Yönetimi</h1>
+            <p class="mt-1 text-sm text-white/90"><strong>@userName</strong> için rol atama ve kaldırma işlemleri.</p>
         </div>
 
-        <h3 class="font-semibold mb-3">Rol Ekle</h3>
-        <div class="flex flex-wrap gap-2">
-            @foreach (var role in allRoles ?? new List<string>())
-            {
-                <button class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 add-role" data-role="@role">@role Ekle</button>
-            }
-        </div>
-    </div>
-</div>
+        
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                    <h3 class="font-semibold text-slate-800 mb-3">Mevcut Roller</h3>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        @if (userRoles != null && userRoles.Any())
+                        {
+                            foreach (var role in userRoles)
+                            {
+                                <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium remove-role" data-role="@role">@role (Kaldır)</button>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-slate-500">Rol bulunmuyor.</span>
+                        }
+                    </div>
 
-@section Scripts {
-    <script>
+                    <h3 class="font-semibold text-slate-800 mb-3">Rol Ekle</h3>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach (var role in allRoles ?? new List<string>())
+                        {
+                            <button class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-medium add-role" data-role="@role">@role Ekle</button>
+                        }
+                    </div>
+                </div>
+           
+
+            @section Scripts {
+                <script>
     $(function() {
         $('.add-role').click(function() {
             $.post('@Url.Action("AddRole")', { userId: '@userId', role: $(this).data('role') }, function(r) {
@@ -57,5 +58,6 @@
             });
         });
     });
-    </script>
-}
+                </script>
+            
+            }

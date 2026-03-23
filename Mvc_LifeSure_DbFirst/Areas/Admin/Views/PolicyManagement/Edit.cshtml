@@ -10,8 +10,13 @@
     var packages = ViewBag.Packages as List<ResultInsurancePackageDto>;
 }
 
-<div class="p-8">
-    <div class="max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+<div class="p-8 space-y-6">
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20 max-w-3xl">
+        <h1 class="text-2xl font-bold">Poliçe Düzenle</h1>
+        <p class="mt-1 text-sm text-white/90">Poliçe tarih ve prim bilgilerini güncelleyin.</p>
+    </div>
+
+    <div class="max-w-3xl bg-white rounded-2xl border border-slate-200 p-6">
         @using (Html.BeginForm())
         {
             @Html.AntiForgeryToken()

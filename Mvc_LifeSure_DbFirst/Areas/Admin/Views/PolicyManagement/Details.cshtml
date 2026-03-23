@@ -6,8 +6,13 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="p-8">
-    <div class="max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
+<div class="p-8 space-y-6">
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20 max-w-3xl">
+        <h1 class="text-2xl font-bold">Poliçe Detayı</h1>
+        <p class="mt-1 text-sm text-white/90">Poliçenin müşteri ve paket bilgilerini inceleyin.</p>
+    </div>
+
+    <div class="max-w-3xl bg-white rounded-2xl border border-slate-200 p-6 space-y-2">
         <h2 class="text-xl font-semibold">@Model.PolicyNumber</h2>
         <p><strong>Müşteri:</strong> @Model.UserFullName (@Model.UserEmail)</p>
         <p><strong>Şehir:</strong> @Model.UserCity</p>
