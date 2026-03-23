@@ -7,13 +7,13 @@ namespace Mvc_LifeSure_DbFirst.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
-    public sealed partial class AddIdentityTables : IMigrationMetadata
+    public sealed partial class InitialCreate : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(AddIdentityTables));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(InitialCreate));
         
         string IMigrationMetadata.Id
         {
-            get { return "202603171336242_AddIdentityTables"; }
+            get { return "202603231626135_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source

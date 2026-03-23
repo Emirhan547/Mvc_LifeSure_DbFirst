@@ -4,350 +4,231 @@
     ViewBag.BreadcrumbTitle = "ML Tahmin";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
-<div class="p-8 space-y-6">
-    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
-        <h1 class="text-2xl font-bold">@ViewBag.PageTitle</h1>
-        <p class="mt-1 text-sm text-white/90">Yönetim ekranı temayla uyumlu olacak şekilde güncellendi.</p>
-    </div>
-</div>
 
-<style>
-    .card {
-        border-radius: 1rem;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 2px rgba(15,23,42,.06)
-    }
-
-    .card-header {
-        border-top-left-radius: 1rem !important;
-        border-top-right-radius: 1rem !important;
-        background: linear-gradient(90deg,#0ea5e9,#06b6d4) !important;
-        color: #fff !important;
-        border-bottom: 1px solid #e2e8f0
-    }
-
-    .table-light {
-        background: #f8fafc !important
-    }
-</style>
-<style>
-    .forecast-card {
-        transition: all 0.3s ease;
-        border: none;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-        .forecast-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-        }
-
-    .confidence-interval {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-
-    .metric-box {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 10px;
-        padding: 15px;
-        text-align: center;
-    }
-
-    .metric-box-sm {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 10px;
-        text-align: center;
-    }
-</style>
-@using (Html.BeginForm("ExportForecast", "Forecast", FormMethod.Post, new { id = "exportForecastForm" }))
+@* Export formu - CSRF token taşır *@
+@using (Html.BeginForm("ExportForecast", "Forecast", new { area = "Admin" }, FormMethod.Post, new { id = "exportForm" }))
 {
     @Html.AntiForgeryToken()
     <input type="hidden" name="city" id="exportCity" />
     <input type="hidden" name="months" id="exportMonths" />
 }
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        <!-- Kontrol Kartı -->
-        <div class="card forecast-card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-line me-2"></i>Tahmin Parametreleri
-                </h5>
+@* Genel AJAX token formu *@
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "antiForgeryForm", style = "display:none;" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+<div class="p-8 space-y-6">
+
+  
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+        <h1 class="text-2xl font-bold">ML ile Poliçe Satış Tahmini</h1>
+        <p class="mt-1 text-sm text-white/90">Şehir bazlı satış ve prim tahminleri; model eğitimi ve CSV dışa aktarımı.</p>
+    </div>
+
+  
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <h2 class="text-lg font-semibold text-slate-800">Tahmin Parametreleri</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Şehir</label>
+                <select id="citySelect"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="">-- Şehir Seçin --</option>
+                    @foreach (var city in ViewBag.Cities)
+                    {
+                        <option value="@city">@city</option>
+                    }
+                </select>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Şehir Seçin</label>
-                        <select id="citySelect" class="form-select">
-                            <option value="">-- Şehir Seçin --</option>
-                            @foreach (var city in ViewBag.Cities)
-                            {
-                                <option value="@city">@city</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Tahmin Süresi (Ay)</label>
-                        <select id="monthsSelect" class="form-select">
-                            <option value="3">3 Ay</option>
-                            <option value="6" selected>6 Ay</option>
-                            <option value="12">12 Ay</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3 d-flex align-items-end">
-                        <button class="btn btn-primary w-100" id="forecastBtn">
-                            <i class="fas fa-magic me-2"></i>Tahmin Yap
-                        </button>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-4">
-                        <button class="btn btn-outline-info w-100" id="trainModelBtn">
-                            <i class="fas fa-brain me-2"></i>Model Eğit
-                        </button>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-outline-success w-100" id="validateBtn">
-                            <i class="fas fa-check-circle me-2"></i>Doğruluk Testi
-                        </button>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-outline-warning w-100" id="exportBtn">
-                            <i class="fas fa-download me-2"></i>CSV İndir
-                        </button>
-                    </div>
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Tahmin Süresi</label>
+                <select id="monthsSelect"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="3">3 Ay</option>
+                    <option value="6" selected>6 Ay</option>
+                    <option value="12">12 Ay</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button id="forecastBtn"
+                        class="w-full px-4 py-2.5 rounded-xl bg-primary text-white font-medium hover:bg-cyan-600 transition-colors text-sm">
+                    Tahmin Yap
+                </button>
             </div>
         </div>
 
-        <!-- Sonuç Kartı -->
-        <div class="card forecast-card d-none" id="resultCard">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-bar me-2"></i>Tahmin Sonuçları
-                </h5>
-                <span class="badge bg-light text-dark" id="cityName"></span>
-            </div>
-            <div class="card-body">
-                <!-- Yükleniyor -->
-                <div class="text-center py-5 d-none" id="loading">
-                    <div class="spinner-border text-primary mb-3" role="status"></div>
-                    <h6 class="text-muted">ML model tahmin yapıyor...</h6>
-                </div>
+        <div class="flex flex-wrap gap-2 pt-1">
+            <button id="trainModelBtn"
+                    class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:border-primary hover:text-primary transition-colors text-sm">
+                Model Eğit
+            </button>
+            <button id="validateBtn"
+                    class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors text-sm">
+                Doğruluk Testi
+            </button>
+            <button id="exportBtn"
+                    class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:border-amber-500 hover:text-amber-600 transition-colors text-sm">
+                CSV İndir
+            </button>
+        </div>
+    </div>
 
-                <!-- Hata Mesajı -->
-                <div class="alert alert-danger d-none" id="errorMessage"></div>
+  
+    <div id="resultPanel" class="hidden space-y-4">
 
-                <!-- Metrikler -->
-                <div class="row mb-4" id="metricsRow"></div>
+     
+        <div id="loadingIndicator" class="hidden bg-white rounded-2xl border border-slate-200 p-10 text-center">
+            <div class="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p class="text-slate-500 text-sm">ML modeli tahmin yapıyor…</p>
+        </div>
 
-                <!-- Grafik -->
-                <canvas id="forecastChart" style="height: 300px; width: 100%;"></canvas>
+      
+        <div id="errorBox" class="hidden bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl px-5 py-4 text-sm"></div>
 
-                <!-- Tablo -->
-                <div class="table-responsive mt-4">
-                    <table class="table table-hover" id="forecastTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Dönem</th>
-                                <th>Tahmini Satış</th>
-                                <th>Tahmini Prim</th>
-                                <th>Alt Limit</th>
-                                <th>Üst Limit</th>
-                                <th>Güven Aralığı</th>
-                            </tr>
-                        </thead>
-                        <tbody id="forecastTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
+      
+        <div id="metricsRow" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+
+      
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-slate-800 mb-4" id="chartTitle">Tahmin Grafiği</h2>
+            <canvas id="forecastChart" style="max-height:300px;"></canvas>
+        </div>
+
+     
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-left text-slate-700 font-semibold">
+                    <tr>
+                        <th class="px-4 py-3">Dönem</th>
+                        <th class="px-4 py-3">Tahmini Satış</th>
+                        <th class="px-4 py-3">Tahmini Prim</th>
+                        <th class="px-4 py-3">Alt Limit</th>
+                        <th class="px-4 py-3">Üst Limit</th>
+                        <th class="px-4 py-3">Güven Aralığı</th>
+                    </tr>
+                </thead>
+                <tbody id="forecastTableBody"></tbody>
+            </table>
         </div>
     </div>
 </div>
 
-<!-- Template for metric -->
-<template id="metricTemplate">
-    <div class="col-md-3 mb-3">
-        <div class="metric-box-sm">
-            <h6 class="text-muted mb-2 metric-title"></h6>
-            <h4 class="mb-0 metric-value"></h4>
-            <small class="text-muted metric-sub"></small>
-        </div>
-    </div>
-</template>
-
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        $(document).ready(function () {
-            var antiForgeryToken = $("#exportForecastForm input[name='__RequestVerificationToken']").val();
-
-            function getRequestData(data) {
-                return $.extend({ __RequestVerificationToken: antiForgeryToken }, data);
-            }
+        $(function () {
+            var token = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
             var chart = null;
 
-            // Tahmin butonu
-            $("#forecastBtn").click(function() {
-                var city = $("#citySelect").val();
-                var months = $("#monthsSelect").val();
-
-                if(!city) {
-                    alert("Lütfen bir şehir seçin.");
-                    return;
-                }
-
-                getForecast(city, months);
-            });
-
-            // Model eğit butonu
-            $("#trainModelBtn").click(function() {
-                var city = $("#citySelect").val();
-                if(!city) {
-                    alert("Lütfen bir şehir seçin.");
-                    return;
-                }
-
-                if(confirm(city + " için ML model eğitmek istediğinize emin misiniz?")) {
-                    trainModel(city);
-                }
-            });
-
-            // Doğrulama butonu
-            $("#validateBtn").click(function() {
-                var city = $("#citySelect").val();
-                if(!city) {
-                    alert("Lütfen bir şehir seçin.");
-                    return;
-                }
-
-                validateForecast(city);
-            });
-
-            // Export butonu
-            $("#exportBtn").click(function() {
-                var city = $("#citySelect").val();
-                var months = $("#monthsSelect").val();
-
-                if(!city) {
-                    alert("Lütfen bir şehir seçin.");
-                    return;
-                }
-
-                $("#exportCity").val(city);
-                $("#exportMonths").val(months);
-                $("#exportForecastForm").submit();
-            });
-
-            function getForecast(city, months) {
-                $("#resultCard").removeClass("d-none");
-                $("#loading").removeClass("d-none");
-                $("#errorMessage").addClass("d-none");
-                $("#forecastTableBody").empty();
-                $("#metricsRow").empty();
-                $("#cityName").text(city);
-
-                $.ajax({
-                    url: '@Url.Action("GetForecast")',
-                    type: 'POST',
-                    data: getRequestData({ city: city, months: months }),
-                    success: function(response) {
-                        $("#loading").addClass("d-none");
-
-                        if(response.success) {
-                            displayForecast(response.data);
-                        } else {
-                            $("#errorMessage")
-                                .removeClass("d-none")
-                                .text(response.message);
-                        }
-                    },
-                    error: function() {
-                        $("#loading").addClass("d-none");
-                        $("#errorMessage")
-                            .removeClass("d-none")
-                            .text("Tahmin yapılırken bir hata oluştu.");
-                    }
-                });
+            function buildData(extra) {
+                return $.extend({ __RequestVerificationToken: token }, extra);
             }
 
-            function displayForecast(data) {
-                // Metrikleri hesapla
-                var totalSales = data.reduce((sum, item) => sum + item.predictedSales, 0);
-                var totalPremium = data.reduce((sum, item) => sum + item.predictedPremium, 0);
+            function getSelectedCity() {
+                var city = $("#citySelect").val();
+                if (!city) { alert("Lütfen bir şehir seçin."); return null; }
+                return city;
+            }
+
+            function showLoading(show) {
+                if (show) {
+                    $("#resultPanel").removeClass("hidden");
+                    $("#loadingIndicator").removeClass("hidden");
+                    $("#errorBox").addClass("hidden");
+                    $("#metricsRow, #forecastTableBody").empty();
+                } else {
+                    $("#loadingIndicator").addClass("hidden");
+                }
+            }
+
+            function showError(msg) {
+                showLoading(false);
+                $("#errorBox").removeClass("hidden").text(msg);
+            }
+
+            function buildMetricCard(title, value, sub) {
+                return '<div class="bg-slate-50 rounded-xl p-4 text-center">' +
+                    '<p class="text-xs text-slate-500 mb-1">' + title + '</p>' +
+                    '<p class="text-2xl font-bold text-slate-800">' + value + '</p>' +
+                    '<p class="text-xs text-slate-400 mt-1">' + sub + '</p>' +
+                    '</div>';
+            }
+
+            // ---- Tahmin ----
+            $("#forecastBtn").click(function () {
+                var city = getSelectedCity(); if (!city) return;
+                var months = $("#monthsSelect").val();
+                showLoading(true);
+                $("#chartTitle").text(city + " — " + months + " Aylık Tahmin");
+
+                $.ajax({
+                    url: '@Url.Action("GetForecast", "Forecast", new { area = "Admin" })',
+                    type: "POST",
+                    data: buildData({ city: city, months: months }),
+                    success: function (r) {
+                        showLoading(false);
+                        if (!r.success) { showError(r.message); return; }
+                        renderForecast(r.data);
+                    },
+                    error: function () { showError("Tahmin alınırken sunucu hatası oluştu."); }
+                });
+            });
+
+            function renderForecast(data) {
+                var totalSales = data.reduce(function (s, d) { return s + d.predictedSales; }, 0);
+                var totalPremium = data.reduce(function (s, d) { return s + d.predictedPremium; }, 0);
                 var avgSales = totalSales / data.length;
                 var avgPremium = totalPremium / data.length;
 
-                // Metrikleri göster
-                var metricTemplate = document.getElementById('metricTemplate');
+                $("#metricsRow")
+                    .append(buildMetricCard("Toplam Satış", Math.round(totalSales) + " adet", "tahmin"))
+                    .append(buildMetricCard("Toplam Prim", Math.round(totalPremium).toLocaleString("tr-TR") + " ₺", "tahmin"))
+                    .append(buildMetricCard("Ort. Satış", Math.round(avgSales) + " adet/ay", "aylık"))
+                    .append(buildMetricCard("Ort. Prim", Math.round(avgPremium).toLocaleString("tr-TR") + " ₺", "aylık"));
 
-                var metrics = [
-                    { title: 'Toplam Satış', value: Math.round(totalSales), sub: 'adet' },
-                    { title: 'Toplam Prim', value: Math.round(totalPremium).toLocaleString() + ' ₺', sub: 'tutar' },
-                    { title: 'Ort. Satış', value: Math.round(avgSales), sub: 'adet/ay' },
-                    { title: 'Ort. Prim', value: Math.round(avgPremium).toLocaleString() + ' ₺', sub: 'aylık' }
-                ];
-
-                metrics.forEach(metric => {
-                    var clone = metricTemplate.content.cloneNode(true);
-                    $(clone).find('.metric-title').text(metric.title);
-                    $(clone).find('.metric-value').text(metric.value);
-                    $(clone).find('.metric-sub').text(metric.sub);
-                    $("#metricsRow").append(clone);
+                var tbody = "";
+                $.each(data, function (i, item) {
+                    var range = Math.round((item.confidenceUpper - item.confidenceLower) / 2);
+                    tbody += "<tr class='border-t border-slate-100'>" +
+                        "<td class='px-4 py-3 font-medium text-slate-700'>" + item.period + "</td>" +
+                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.predictedSales) + " adet</td>" +
+                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.predictedPremium).toLocaleString("tr-TR") + " ₺</td>" +
+                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.confidenceLower) + "</td>" +
+                        "<td class='px-4 py-3 text-slate-600'>" + Math.round(item.confidenceUpper) + "</td>" +
+                        "<td class='px-4 py-3 text-slate-600'>±" + range + " adet</td>" +
+                        "</tr>";
                 });
+                $("#forecastTableBody").html(tbody);
 
-                // Tabloyu doldur
-                var tableHtml = '';
-                data.forEach(item => {
-                    var confidenceRange = Math.round(item.confidenceUpper - item.confidenceLower);
-                    tableHtml += `
-                        <tr>
-                            <td><strong>${item.period}</strong></td>
-                            <td>${Math.round(item.predictedSales)} adet</td>
-                            <td>${Math.round(item.predictedPremium).toLocaleString()} ₺</td>
-                            <td>${Math.round(item.confidenceLower)} adet</td>
-                            <td>${Math.round(item.confidenceUpper)} adet</td>
-                            <td>±${Math.round(confidenceRange/2)} adet</td>
-                        </tr>
-                    `;
-                });
-                $("#forecastTableBody").html(tableHtml);
-
-                // Grafik
-                var ctx = document.getElementById('forecastChart').getContext('2d');
-
-                if(chart) {
-                    chart.destroy();
-                }
-
-                chart = new Chart(ctx, {
-                    type: 'line',
+                if (chart) chart.destroy();
+                chart = new Chart(document.getElementById("forecastChart"), {
+                    type: "line",
                     data: {
-                        labels: data.map(item => item.period),
+                        labels: data.map(function (d) { return d.period; }),
                         datasets: [
                             {
-                                label: 'Tahmini Satış',
-                                data: data.map(item => item.predictedSales),
-                                borderColor: 'rgb(13, 110, 253)',
-                                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                                label: "Tahmini Satış",
+                                data: data.map(function (d) { return d.predictedSales; }),
+                                borderColor: "#1193d4",
+                                backgroundColor: "rgba(17,147,212,0.08)",
                                 tension: 0.4,
-                                fill: false
+                                fill: true,
+                                pointRadius: 4
                             },
                             {
-                                label: 'Alt Limit',
-                                data: data.map(item => item.confidenceLower),
-                                borderColor: 'rgba(220, 53, 69, 0.5)',
+                                label: "Alt Limit",
+                                data: data.map(function (d) { return d.confidenceLower; }),
+                                borderColor: "rgba(239,68,68,0.4)",
                                 borderDash: [5, 5],
                                 fill: false,
                                 pointRadius: 0
                             },
                             {
-                                label: 'Üst Limit',
-                                data: data.map(item => item.confidenceUpper),
-                                borderColor: 'rgba(25, 135, 84, 0.5)',
+                                label: "Üst Limit",
+                                data: data.map(function (d) { return d.confidenceUpper; }),
+                                borderColor: "rgba(34,197,94,0.4)",
                                 borderDash: [5, 5],
                                 fill: false,
                                 pointRadius: 0
@@ -358,75 +239,68 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: {
-                                position: 'bottom'
-                            },
+                            legend: { position: "bottom" },
                             tooltip: {
                                 callbacks: {
-                                    label: function(context) {
-                                        return context.dataset.label + ': ' + Math.round(context.raw) + ' adet';
+                                    label: function (ctx) {
+                                        return ctx.dataset.label + ": " + Math.round(ctx.raw) + " adet";
                                     }
                                 }
                             }
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return value + ' adet';
-                                    }
-                                }
-                            }
-                        }
+                        scales: { y: { beginAtZero: true } }
                     }
                 });
             }
 
-            function trainModel(city) {
-                $("#loading").removeClass("d-none");
+            // ---- Model Eğit ----
+            $("#trainModelBtn").click(function () {
+                var city = getSelectedCity(); if (!city) return;
+                if (!confirm(city + " için ML modeli eğitmek istediğinize emin misiniz?")) return;
 
                 $.ajax({
-                    url: '@Url.Action("TrainModel")',
-                    type: 'POST',
-                    data: getRequestData({ city: city }),
-                    success: function(response) {
-                        $("#loading").addClass("d-none");
-
-                        if(response.success) {
-                            var result = response.data;
-                            var message = `
-                                Model Eğitildi!
-                                R² Skoru: ${result.rScore.toFixed(3)}
-                                Ortalama Hata: ${result.meanAbsoluteError.toFixed(2)} adet
-                                Veri Sayısı: ${result.dataPointCount}
-                            `;
-                            alert(message);
+                    url: '@Url.Action("TrainModel", "Forecast", new { area = "Admin" })',
+                    type: "POST",
+                    data: buildData({ city: city }),
+                    success: function (r) {
+                        if (r.success) {
+                            var d = r.data;
+                            alert("Model eğitildi!\nR² Skoru: " + d.rScore.toFixed(3) +
+                                "\nOrtalama Hata: " + d.meanAbsoluteError.toFixed(2) + " adet" +
+                                "\nVeri Sayısı: " + d.dataPointCount);
                         } else {
-                            alert("Hata: " + response.message);
+                            alert("Hata: " + r.message);
                         }
                     },
-                    error: function() {
-                        $("#loading").addClass("d-none");
-                        alert("Model eğitilirken hata oluştu.");
-                    }
+                    error: function () { alert("Sunucu hatası oluştu."); }
                 });
-            }
+            });
 
-            function validateForecast(city) {
+            // ---- Doğruluk Testi ----
+            $("#validateBtn").click(function () {
+                var city = getSelectedCity(); if (!city) return;
                 $.ajax({
-                    url: '@Url.Action("ValidateForecast")',
-                    type: 'POST',
-                    data: getRequestData({ city: city }),
-                    success: function(response) {
-                        if(response.success) {
-                            alert(`${city} için tahmin doğruluğu: %${response.accuracy}`);
+                    url: '@Url.Action("ValidateForecast", "Forecast", new { area = "Admin" })',
+                    type: "POST",
+                    data: buildData({ city: city }),
+                    success: function (r) {
+                        if (r.success) {
+                            alert(city + " için tahmin doğruluğu: %" + r.accuracy);
                         } else {
-                            alert("Hata: " + response.message);
+                            alert("Hata: " + r.message);
                         }
-                    }
+                    },
+                    error: function () { alert("Sunucu hatası oluştu."); }
                 });
-            }
+            });
+
+            // ---- CSV İndir ----
+            $("#exportBtn").click(function () {
+                var city = getSelectedCity(); if (!city) return;
+                $("#exportCity").val(city);
+                $("#exportMonths").val($("#monthsSelect").val());
+                $("#exportForm").submit();
+            });
         });
     </script>
 }

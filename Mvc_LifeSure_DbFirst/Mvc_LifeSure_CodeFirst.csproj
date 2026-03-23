@@ -365,9 +365,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202603171336242_AddIdentityTables.cs" />
-    <Compile Include="Migrations\202603171336242_AddIdentityTables.Designer.cs">
-      <DependentUpon>202603171336242_AddIdentityTables.cs</DependentUpon>
+    <Compile Include="Migrations\202603231626135_InitialCreate.cs" />
+    <Compile Include="Migrations\202603231626135_InitialCreate.Designer.cs">
+      <DependentUpon>202603231626135_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -756,8 +756,8 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202603171336242_AddIdentityTables.resx">
-      <DependentUpon>202603171336242_AddIdentityTables.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202603231626135_InitialCreate.resx">
+      <DependentUpon>202603231626135_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

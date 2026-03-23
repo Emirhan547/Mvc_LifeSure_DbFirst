@@ -7,7 +7,6 @@ using Mvc_LifeSure_DbFirst.Services.AdminLogServices;
 using Mvc_LifeSure_DbFirst.Services.AppUserServices;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -28,106 +27,107 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             _userManager = userManager;
         }
 
-        public AppUserManager UserManager
-        {
-            get { return _userManager ?? HttpContext.GetOwinContext().GetUserManager<AppUserManager>(); }
-            private set { _userManager = value; }
-        }
+        private AppUserManager UserManager =>
+            _userManager ?? HttpContext.GetOwinContext().GetUserManager<AppUserManager>();
 
+        // GET: Admin/UserManagement
         public async Task<ActionResult> Index()
         {
             var users = await _userService.GetAllUsersAsync();
             return View(users);
         }
 
+        // GET: Admin/UserManagement/Details/id
         public async Task<ActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return HttpNotFound();
 
-            var user = await _userService.GetUserWithPoliciesAsync(id);
-            if (user == null)
-                return HttpNotFound();
+            try
+            {
+                var user = await _userService.GetUserWithPoliciesAsync(id);
+                if (user == null) return HttpNotFound();
 
-            // Kullanıcının rollerini getir
-            var appUser = await UserManager.FindByIdAsync(id);
-            var roles = await UserManager.GetRolesAsync(id);
-            ViewBag.UserRoles = roles;
-
-            return View(user);
+                var roles = await UserManager.GetRolesAsync(id);
+                ViewBag.UserRoles = roles;
+                return View(user);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
+        // GET: Admin/UserManagement/Edit/id
         public async Task<ActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return HttpNotFound();
 
-            var user = await _userService.GetUserByIdAsync(id);
-            if (user == null)
-                return HttpNotFound();
-
-            var updateDto = new UpdateAppUserDto
+            try
             {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                UserName = user.UserName,
-                City = user.City,
-                BirthDate = user.BirthDate,
-                PhoneNumber = user.PhoneNumber,
-                IsActive = user.IsActive
-            };
+                var user = await _userService.GetUserByIdAsync(id);
+                if (user == null) return HttpNotFound();
 
-            return View(updateDto);
+                var updateDto = new UpdateAppUserDto
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    UserName = user.UserName,
+                    City = user.City,
+                    BirthDate = user.BirthDate,
+                    PhoneNumber = user.PhoneNumber,
+                    IsActive = user.IsActive
+                };
+                return View(updateDto);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
+        // POST: Admin/UserManagement/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(UpdateAppUserDto updateDto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(updateDto);
+
+            try
             {
-                try
-                {
-                    await _userService.UpdateUserAsync(updateDto);
-
-                    LogAction(
-                        $"{updateDto.UserName} kullanıcısı güncellendi",
-                        "Update",
-                        "Users",
-                        int.TryParse(updateDto.Id, out int id) ? id : 0
-                    );
-
-                    TempData["SuccessMessage"] = "Kullanıcı başarıyla güncellendi.";
-                    return RedirectToAction("Index");
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", ex.Message);
-                }
+                await _userService.UpdateUserAsync(updateDto);
+                LogAction($"{updateDto.UserName} kullanıcısı güncellendi", "Update", "Users");
+                TempData["SuccessMessage"] = "Kullanıcı başarıyla güncellendi.";
+                return RedirectToAction(nameof(Index));
             }
-
-            return View(updateDto);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(updateDto);
+            }
         }
 
+        // POST: Admin/UserManagement/ToggleStatus  (AJAX)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ToggleStatus(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return Json(new { success = false, message = "Geçersiz kullanıcı kimliği." });
+
             try
             {
                 var isActive = await _userService.ToggleUserStatusAsync(id);
                 var user = await _userService.GetUserByIdAsync(id);
-
-                LogAction(
-                    $"{user.UserName} kullanıcısı {(isActive ? "aktifleştirildi" : "pasifleştirildi")}",
-                    "Update",
-                    "Users",
-                    int.TryParse(id, out int userId) ? userId : 0
-                );
-
-                return Json(new { success = true, isActive = isActive });
+                var statusText = isActive ? "aktifleştirildi" : "pasifleştirildi";
+                LogAction($"{user?.UserName} kullanıcısı {statusText}", "Update", "Users");
+                return Json(new { success = true, isActive });
             }
             catch (Exception ex)
             {
@@ -135,22 +135,19 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
+        // POST: Admin/UserManagement/Delete  (AJAX)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return Json(new { success = false, message = "Geçersiz kullanıcı kimliği." });
+
             try
             {
                 var user = await _userService.GetUserByIdAsync(id);
                 await _userService.DeleteUserAsync(id);
-
-                LogAction(
-                    $"{user.UserName} kullanıcısı silindi",
-                    "Delete",
-                    "Users",
-                    int.TryParse(id, out int userId) ? userId : 0
-                );
-
+                LogAction($"{user?.UserName} kullanıcısı silindi", "Delete", "Users");
                 return Json(new { success = true });
             }
             catch (Exception ex)
@@ -159,46 +156,40 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
+        // GET: Admin/UserManagement/ManageRoles/id
         public async Task<ActionResult> ManageRoles(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return HttpNotFound();
 
             var user = await UserManager.FindByIdAsync(id);
-            if (user == null)
-                return HttpNotFound();
+            if (user == null) return HttpNotFound();
 
             var userRoles = await UserManager.GetRolesAsync(id);
-            var allRoles = new List<string> { "Admin", "User", "Agent" }; // Rolleri buradan alabilirsin
-
             ViewBag.UserId = id;
             ViewBag.UserName = user.UserName;
             ViewBag.UserRoles = userRoles;
-            ViewBag.AllRoles = allRoles;
-
+            ViewBag.AllRoles = new List<string> { "Admin", "User", "Agent" };
             return View();
         }
 
+        // POST: Admin/UserManagement/AddRole  (AJAX)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddRole(string userId, string role)
         {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(role))
+                return Json(new { success = false, message = "Geçersiz parametre." });
+
             try
             {
                 var result = await UserManager.AddToRoleAsync(userId, role);
-                if (result.Succeeded)
-                {
-                    var user = await UserManager.FindByIdAsync(userId);
-                    LogAction(
-                        $"{user.UserName} kullanıcısına {role} rolü eklendi",
-                        "Update",
-                        "UserRoles",
-                        int.TryParse(userId, out int id) ? id : 0
-                    );
+                if (!result.Succeeded)
+                    return Json(new { success = false, message = string.Join(", ", result.Errors) });
 
-                    return Json(new { success = true });
-                }
-                return Json(new { success = false, message = string.Join(", ", result.Errors) });
+                var user = await UserManager.FindByIdAsync(userId);
+                LogAction($"{user?.UserName} kullanıcısına {role} rolü eklendi", "Update", "UserRoles");
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
@@ -206,26 +197,23 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
+        // POST: Admin/UserManagement/RemoveRole  (AJAX)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> RemoveRole(string userId, string role)
         {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(role))
+                return Json(new { success = false, message = "Geçersiz parametre." });
+
             try
             {
                 var result = await UserManager.RemoveFromRoleAsync(userId, role);
-                if (result.Succeeded)
-                {
-                    var user = await UserManager.FindByIdAsync(userId);
-                    LogAction(
-                        $"{user.UserName} kullanıcısından {role} rolü çıkarıldı",
-                        "Update",
-                        "UserRoles",
-                        int.TryParse(userId, out int id) ? id : 0
-                    );
+                if (!result.Succeeded)
+                    return Json(new { success = false, message = string.Join(", ", result.Errors) });
 
-                    return Json(new { success = true });
-                }
-                return Json(new { success = false, message = string.Join(", ", result.Errors) });
+                var user = await UserManager.FindByIdAsync(userId);
+                LogAction($"{user?.UserName} kullanıcısından {role} rolü kaldırıldı", "Update", "UserRoles");
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {

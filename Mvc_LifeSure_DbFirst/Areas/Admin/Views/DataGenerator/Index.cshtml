@@ -3,218 +3,204 @@
     ViewBag.PageTitle = "Veri Oluşturucu";
     ViewBag.BreadcrumbTitle = "Veri Oluşturma";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    int totalPolicies = (int)(ViewBag.TotalPolicies ?? 0);
+    decimal totalPremium = (decimal)(ViewBag.TotalPremium ?? 0m);
 }
-<div class="p-8 space-y-6">
-    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
-        <h1 class="text-2xl font-bold">@ViewBag.PageTitle</h1>
-        <p class="mt-1 text-sm text-white/90">Yönetim ekranı temayla uyumlu olacak şekilde güncellendi.</p>
-    </div>
-</div>
 
-<style>
-    .card {
-        border-radius: 1rem;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 2px rgba(15,23,42,.06)
-    }
-
-    .card-header {
-        border-top-left-radius: 1rem !important;
-        border-top-right-radius: 1rem !important;
-        background: linear-gradient(90deg,#0ea5e9,#06b6d4) !important;
-        color: #fff !important;
-        border-bottom: 1px solid #e2e8f0
-    }
-
-    .table-light {
-        background: #f8fafc !important
-    }
-</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "antiForgeryForm", style = "display:none;" }))
 {
     @Html.AntiForgeryToken()
 }
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Gemini AI ile Veri Oluşturma</h5>
+
+<div class="p-8 space-y-6">
+
+  
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+        <h1 class="text-2xl font-bold">Gemini AI ile Veri Oluşturucu</h1>
+        <p class="mt-1 text-sm text-white/90">
+            ML tahminleri için gerçekçi sigorta poliçe verisi üretin.
+        </p>
+    </div>
+
+   
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <p class="text-sm text-slate-500">Toplam Poliçe Sayısı</p>
+            <p class="mt-2 text-3xl font-bold text-primary" id="totalPoliciesDisplay">@totalPolicies</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <p class="text-sm text-slate-500">Toplam Prim Tutarı</p>
+            <p class="mt-2 text-3xl font-bold text-emerald-600" id="totalPremiumDisplay">@totalPremium.ToString("C0")</p>
+        </div>
+    </div>
+
+   
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-semibold text-slate-800">Yeni Veri Oluştur</h2>
+
+        <div class="rounded-xl bg-sky-50 border border-sky-200 px-4 py-3 text-sm text-sky-700">
+            Gemini AI kullanarak gerçekçi poliçe satış verisi oluşturabilirsiniz. Oluşturulan veriler ML tahmin modeli için kullanılır.
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 items-end">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Oluşturulacak Poliçe Sayısı</label>
+                <input type="number" id="policyCount" value="1500" min="100" max="5000" step="100"
+                       class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <p class="text-xs text-slate-400 mt-1">Min: 100 — Maks: 5.000</p>
             </div>
-            <div class="card-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Gemini AI kullanarak 1500+ poliçe verisi oluşturabilirsiniz.
-                    Oluşturulan veriler analiz ve tahminleme işlemleri için kullanılacaktır.
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="bg-light p-3 rounded text-center">
-                            <h6 class="text-muted mb-2">Toplam Poliçe Sayısı</h6>
-                            <h2 class="text-primary mb-0">@ViewBag.TotalPolicies</h2>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="bg-light p-3 rounded text-center">
-                            <h6 class="text-muted mb-2">Toplam Prim Tutarı</h6>
-                            <h2 class="text-success mb-0">@ViewBag.TotalPremium.ToString("C0")</h2>
-                        </div>
-                    </div>
-                </div>
-
-                <form id="generateForm">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Oluşturulacak Poliçe Sayısı</label>
-                        <input type="number" id="policyCount" class="form-control" value="1500" min="100" max="5000" step="100">
-                        <small class="text-muted">Minimum 100, maksimum 5000 poliçe oluşturabilirsiniz.</small>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" id="generateBtn">
-                            <i class="fas fa-magic me-2"></i>Verileri Oluştur
-                        </button>
-                        <a href="@Url.Action("ViewData")" class="btn btn-info">
-                            <i class="fas fa-eye me-2"></i>Verileri Görüntüle
-                        </a>
-                        <button type="button" class="btn btn-danger" id="clearBtn">
-                            <i class="fas fa-trash me-2"></i>Tüm Verileri Sil
-                        </button>
-                    </div>
-                </form>
-
-                <div class="progress mt-4 d-none" id="progressBar">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                         role="progressbar"
-                         style="width: 0%"
-                         id="progress">
-                        0%
-                    </div>
-                </div>
-
-                <div class="alert mt-4 d-none" id="resultMessage" role="alert"></div>
+            <div class="flex gap-2">
+                <button id="generateBtn" type="button"
+                        class="px-5 py-2.5 rounded-xl bg-primary text-white font-medium hover:bg-cyan-600 transition-colors text-sm">
+                    Oluştur
+                </button>
+                <a href="@Url.Action("ViewData")"
+                   class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-medium hover:bg-slate-200 transition-colors text-sm">
+                    Verileri Gör
+                </a>
+                <button id="clearBtn" type="button"
+                        class="px-5 py-2.5 rounded-xl bg-rose-100 text-rose-700 font-medium hover:bg-rose-200 transition-colors text-sm">
+                    Tümünü Sil
+                </button>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Veri Dağılımı</h5>
+     
+        <div id="progressWrapper" class="hidden space-y-1">
+            <div class="flex justify-between text-xs text-slate-500">
+                <span id="progressLabel">Oluşturuluyor…</span>
+                <span id="progressPercent">0%</span>
             </div>
-            <div class="card-body">
-                <canvas id="distributionChart" style="height: 300px;"></canvas>
+            <div class="w-full bg-slate-200 rounded-full h-2">
+                <div id="progressBar" class="h-2 rounded-full bg-primary transition-all duration-300" style="width:0%"></div>
             </div>
         </div>
+
+      
+        <div id="resultMsg" class="hidden rounded-xl px-4 py-3 text-sm font-medium"></div>
+    </div>
+
+  
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-slate-800 mb-4">Aylık Dağılım</h2>
+        <canvas id="distributionChart" style="max-height:260px;"></canvas>
     </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        $(document).ready(function () {
-            var antiForgeryToken = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
+        $(function () {
+            var token = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
 
-            function getRequestData(data) {
-                return $.extend({ __RequestVerificationToken: antiForgeryToken }, data);
+            function postData(extra) {
+                return $.extend({ __RequestVerificationToken: token }, extra);
             }
-            $("#generateForm").submit(function(e) {
-                e.preventDefault();
 
-                var count = $("#policyCount").val();
-                if (!confirm(count + " adet poliçe verisi oluşturmak istediğinize emin misiniz? Bu işlem birkaç dakika sürebilir.")) {
+            function showResult(msg, isSuccess) {
+                var $r = $("#resultMsg");
+                $r.removeClass("hidden bg-emerald-50 border-emerald-200 text-emerald-700 bg-rose-50 border-rose-200 text-rose-700");
+                var cls = isSuccess
+                    ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+                    : "bg-rose-50 border border-rose-200 text-rose-700";
+                $r.addClass(cls).text(msg).show();
+            }
+
+            function setProgress(pct, label) {
+                $("#progressBar").css("width", pct + "%");
+                $("#progressPercent").text(pct + "%");
+                if (label) $("#progressLabel").text(label);
+            }
+
+            // ---- Oluştur ----
+            $("#generateBtn").click(function () {
+                var count = parseInt($("#policyCount").val(), 10);
+                if (isNaN(count) || count < 100 || count > 5000) {
+                    showResult("Lütfen 100-5000 arası geçerli bir sayı girin.", false);
                     return;
                 }
+                if (!confirm(count + " adet poliçe verisi oluşturulsun mu? Bu işlem birkaç dakika sürebilir.")) return;
 
-                $("#generateBtn").prop("disabled", true);
-                $("#progressBar").removeClass("d-none");
-                $("#resultMessage").addClass("d-none");
+                $("#generateBtn").prop("disabled", true).text("İşleniyor…");
+                $("#resultMsg").addClass("hidden");
+                $("#progressWrapper").removeClass("hidden");
+                setProgress(0, "Gemini AI'a istek gönderiliyor…");
 
-                // Progress bar animasyonu
                 var progress = 0;
-                var interval = setInterval(function() {
-                    progress += 2;
-                    if (progress <= 90) {
-                        $("#progress").css("width", progress + "%").text(progress + "%");
+                var interval = setInterval(function () {
+                    if (progress < 88) {
+                        progress += 2;
+                        setProgress(progress, "Veri oluşturuluyor… (" + progress + "%)");
                     }
-                }, 100);
+                }, 200);
 
                 $.ajax({
                     url: '@Url.Action("GeneratePolicies")',
-                    type: 'POST',
-                    data: getRequestData({ count: count }),
-                    success: function(response) {
+                    type: "POST",
+                    data: postData({ count: count }),
+                    success: function (r) {
                         clearInterval(interval);
-                        $("#progress").css("width", "100%").text("100%");
-
-                        if (response.success) {
-                            $("#resultMessage")
-                                .removeClass("d-none alert-danger")
-                                .addClass("alert-success")
-                                .html('<i class="fas fa-check-circle me-2"></i>' + response.message);
-
-                            setTimeout(function() {
-                                location.reload();
-                            }, 2000);
+                        setProgress(100, "Tamamlandı");
+                        if (r.success) {
+                            showResult("✓ " + r.message, true);
+                            setTimeout(function () { location.reload(); }, 1500);
                         } else {
-                            $("#progressBar").addClass("d-none");
-                            $("#resultMessage")
-                                .removeClass("d-none alert-success")
-                                .addClass("alert-danger")
-                                .html('<i class="fas fa-exclamation-circle me-2"></i>' + response.message);
-                            $("#generateBtn").prop("disabled", false);
+                            showResult("✗ " + (r.message || "Hata oluştu."), false);
+                            $("#generateBtn").prop("disabled", false).text("Oluştur");
                         }
                     },
-                    error: function() {
+                    error: function () {
                         clearInterval(interval);
-                        $("#progressBar").addClass("d-none");
-                        $("#resultMessage")
-                            .removeClass("d-none")
-                            .addClass("alert-danger")
-                            .html('<i class="fas fa-exclamation-circle me-2"></i>Bir hata oluştu.');
-                        $("#generateBtn").prop("disabled", false);
+                        setProgress(0, "");
+                        $("#progressWrapper").addClass("hidden");
+                        showResult("✗ Sunucu hatası oluştu.", false);
+                        $("#generateBtn").prop("disabled", false).text("Oluştur");
                     }
                 });
             });
 
-            // Tüm verileri sil
-            $("#clearBtn").click(function() {
-                if (!confirm("Tüm verileri silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) {
-                    return;
-                }
-
+            // ---- Tümünü Sil ----
+            $("#clearBtn").click(function () {
+                if (!confirm("Tüm poliçe verilerini silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) return;
+                $("#clearBtn").prop("disabled", true).text("Siliniyor…");
                 $.ajax({
                     url: '@Url.Action("ClearAllData")',
-                    type: 'POST',
-                    data: getRequestData({}),
-                    success: function(response) {
-                        if (response.success) {
-                            alert(response.message);
-                            location.reload();
+                    type: "POST",
+                    data: postData({}),
+                    success: function (r) {
+                        if (r.success) {
+                            showResult("✓ Tüm veriler silindi.", true);
+                            setTimeout(function () { location.reload(); }, 1000);
                         } else {
-                            alert(response.message);
+                            showResult("✗ " + (r.message || "Silme başarısız."), false);
+                            $("#clearBtn").prop("disabled", false).text("Tümünü Sil");
                         }
+                    },
+                    error: function () {
+                        showResult("✗ Sunucu hatası.", false);
+                        $("#clearBtn").prop("disabled", false).text("Tümünü Sil");
                     }
                 });
             });
 
-            // Dağılım grafiği
-            var ctx = document.getElementById('distributionChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
+            // ---- Dağılım grafiği (placeholder) ----
+            new Chart(document.getElementById("distributionChart"), {
+                type: "bar",
                 data: {
-                    labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                    labels: ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"],
                     datasets: [{
-                        label: 'Poliçe Sayısı',
-                        data: @Html.Raw(Json.Encode(Enumerable.Range(1, 12).Select(x => 0))),
-                        backgroundColor: '#0d6efd'
+                        label: "Poliçe Sayısı",
+                        data: [0,0,0,0,0,0,0,0,0,0,0,0],
+                        backgroundColor: "#1193d4",
+                        borderRadius: 8
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         });

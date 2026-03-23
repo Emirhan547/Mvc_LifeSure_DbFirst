@@ -1,73 +1,60 @@
 ﻿using FluentValidation;
 using Mapster;
 using Mvc_LifeSure_DbFirst.Data.Entities;
-using Mvc_LifeSure_DbFirst.Dtos.ServiceDtos;
 using Mvc_LifeSure_DbFirst.Dtos.TeamDtos;
 using Mvc_LifeSure_DbFirst.Repositories.TeamRepositories;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
 
 namespace Mvc_LifeSure_DbFirst.Services.TeamServices
 {
     public class TeamService : ITeamService
     {
-        private readonly ITeamRepository _repository;
-        private readonly IValidator<CreateTeamDto> _createValidators;
-        private readonly IValidator<UpdateTeamDto> _updateValidators;
+        private readonly ITeamRepository _teamRepository;
+        private readonly IValidator<CreateTeamDto> _createValidator;
+        private readonly IValidator<UpdateTeamDto> _updateValidator;
 
-        public TeamService(ITeamRepository repository, IValidator<CreateTeamDto> createValidators, IValidator<UpdateTeamDto> updateValidators)
+        public TeamService(
+            ITeamRepository teamRepository,
+            IValidator<CreateTeamDto> createValidator,
+            IValidator<UpdateTeamDto> updateValidator)
         {
-            _repository = repository;
-            _createValidators = createValidators;
-            _updateValidators = updateValidators;
-        }
-
-        public void Create(CreateTeamDto create)
-        {
-           _createValidators.ValidateAndThrow(create);
-            var mappedTeams = create.Adapt<Team>();
-            _repository.Create(mappedTeams);
-        }
-
-        public void Delete(int id)
-        {
-            var teams = _repository.GetById(id);
-            if(teams == null)
-            {
-                throw new KeyNotFoundException("Team Not Found");
-            }
-            _repository.Delete(teams);
+            _teamRepository = teamRepository;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
         }
 
         public List<ResultTeamDto> GetAll()
         {
-            var teams=_repository.GetAll();
-            return teams.Adapt<List<ResultTeamDto>>();
+            return _teamRepository.GetAll().Adapt<List<ResultTeamDto>>();
         }
 
-        public UpdateServicesDto GetById(int id)
+        public UpdateTeamDto GetById(int id)
         {
-            var teams = _repository.GetById(id);
-            if( teams == null)
-            {
-                throw new KeyNotFoundException("Team Not Found");
-            }
-            return teams.Adapt<UpdateServicesDto>();
+            var team = _teamRepository.GetById(id)
+                ?? throw new KeyNotFoundException($"Ekip üyesi bulunamadı (Id: {id})");
+            return team.Adapt<UpdateTeamDto>();
+        }
+
+        public void Create(CreateTeamDto create)
+        {
+            _createValidator.ValidateAndThrow(create);
+            _teamRepository.Create(create.Adapt<Team>());
         }
 
         public void Update(UpdateTeamDto update)
         {
-            _updateValidators.ValidateAndThrow(update);
-            var teams=_repository.GetById(update.Id);
-            if(teams ==null)
-            {
-                throw new KeyNotFoundException("Team Not Found");
-            }
-            update.Adapt(teams);
-            _repository.Update(teams);
+            _updateValidator.ValidateAndThrow(update);
+            var team = _teamRepository.GetById(update.Id)
+                ?? throw new KeyNotFoundException($"Ekip üyesi bulunamadı (Id: {update.Id})");
+            update.Adapt(team);
+            _teamRepository.Update(team);
+        }
+
+        public void Delete(int id)
+        {
+            var team = _teamRepository.GetById(id)
+                ?? throw new KeyNotFoundException($"Ekip üyesi bulunamadı (Id: {id})");
+            _teamRepository.Delete(team);
         }
     }
 }

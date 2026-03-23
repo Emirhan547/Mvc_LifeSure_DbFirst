@@ -105,6 +105,7 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
                 })
                 .ToListAsync();
 
+           
             return users;
         }
 

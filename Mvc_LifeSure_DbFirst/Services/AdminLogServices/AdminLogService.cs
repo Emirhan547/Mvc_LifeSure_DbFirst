@@ -67,6 +67,8 @@ namespace Mvc_LifeSure_DbFirst.Services.AdminLogServices
 
         public void LogAdminAction(string userId, string action, string actionType, string tableName, int? recordId = null)
         {
+            if (string.IsNullOrEmpty(userId))
+                return;
             var log = new CreateAdminLogDto
             {
                 UserId = userId,

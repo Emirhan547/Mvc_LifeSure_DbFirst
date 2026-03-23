@@ -7,66 +7,126 @@
 
     var userId = ViewBag.UserId as string;
     var userName = ViewBag.UserName as string;
-    var userRoles = ViewBag.UserRoles as IList<string>;
-    var allRoles = ViewBag.AllRoles as IList<string>;
+    var userRoles = ViewBag.UserRoles as IList<string> ?? new List<string>();
+    var allRoles = ViewBag.AllRoles as IList<string> ?? new List<string>();
 }
+
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "antiForgeryForm", style = "display:none;" }))
 {
     @Html.AntiForgeryToken()
 }
 
+<div class="p-8 space-y-6">
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+                <h1 class="text-2xl font-bold">Rol Yönetimi</h1>
+                <p class="mt-1 text-sm text-white/90">
+                    <strong>@userName</strong> için rol atama ve kaldırma işlemleri.
+                </p>
+            </div>
+            <a href="@Url.Action("Details", new { id = userId })"
+               class="rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white hover:bg-white/25 transition-colors">
+                ← Kullanıcıya Dön
+            </a>
+        </div>
+    </div>
 
-<div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
-    <h1 class="text-2xl font-bold">Rol Yönetimi</h1>
-    <p class="mt-1 text-sm text-white/90"><strong>@userName</strong> için rol atama ve kaldırma işlemleri.</p>
-</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-
-<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-    <h3 class="font-semibold text-slate-800 mb-3">Mevcut Roller</h3>
-    <div class="flex flex-wrap gap-2 mb-6">
-        @if (userRoles != null && userRoles.Any())
-        {
-            foreach (var role in userRoles)
+        @* Mevcut roller *@
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h3 class="font-semibold text-slate-800 mb-4">Mevcut Roller</h3>
+            @if (userRoles.Count > 0)
             {
-                <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium remove-role" data-role="@role">@role (Kaldır)</button>
+                <div class="flex flex-wrap gap-2" id="currentRolesContainer">
+                    @foreach (var role in userRoles)
+                    {
+                        <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium hover:bg-rose-200 transition-colors remove-role"
+                                data-role="@role">
+                            <span>@role</span>
+                            <span class="text-xs">✕ Kaldır</span>
+                        </button>
+                    }
+                </div>
             }
-        }
-        else
-        {
-            <span class="text-slate-500">Rol bulunmuyor.</span>
-        }
+            else
+            {
+                <p class="text-slate-400 text-sm" id="noRoleMsg">Bu kullanıcıya henüz rol atanmamış.</p>
+            }
+        </div>
+
+        @* Rol ekleme *@
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h3 class="font-semibold text-slate-800 mb-4">Rol Ekle</h3>
+            <div class="flex flex-wrap gap-2">
+                @foreach (var role in allRoles)
+                {
+                    <button class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-medium hover:bg-emerald-200 transition-colors add-role"
+                            data-role="@role">
+                        + @role Ekle
+                    </button>
+                }
+            </div>
+        </div>
     </div>
 
-    <h3 class="font-semibold text-slate-800 mb-3">Rol Ekle</h3>
-    <div class="flex flex-wrap gap-2">
-        @foreach (var role in allRoles ?? new List<string>())
-        {
-            <button class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-medium add-role" data-role="@role">@role Ekle</button>
-        }
-    </div>
+    @* Durum mesajı *@
+    <div id="statusMsg" class="hidden rounded-2xl px-5 py-4 text-sm font-medium"></div>
 </div>
-
 
 @section Scripts {
     <script>
         $(function () {
-         var antiForgeryToken = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
+            var antiForgeryToken = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
+            var userId = '@userId';
 
-        function getRequestData(role) {
-            return { __RequestVerificationToken: antiForgeryToken, userId: '@userId', role: role };
-        }
-        $('.add-role').click(function() {
-           $.post('@Url.Action("AddRole")', getRequestData($(this).data('role')), function(r) {
-                if (r.success) location.reload(); else alert(r.message || 'Hata');
+            function buildData(role) {
+                return { __RequestVerificationToken: antiForgeryToken, userId: userId, role: role };
+            }
+
+            function showMsg(text, isError) {
+                var $msg = $("#statusMsg");
+                $msg.removeClass("hidden bg-emerald-50 border-emerald-200 text-emerald-700 bg-rose-50 border-rose-200 text-rose-700");
+                if (isError) {
+                    $msg.addClass("bg-rose-50 border border-rose-200 text-rose-700");
+                } else {
+                    $msg.addClass("bg-emerald-50 border border-emerald-200 text-emerald-700");
+                }
+                $msg.text(text).show();
+                setTimeout(function () { $msg.addClass("hidden"); }, 3000);
+            }
+
+            // Rol ekle
+            $(".add-role").click(function () {
+                var role = $(this).data("role");
+                $.post('@Url.Action("AddRole", "UserManagement", new { area = "Admin" })', buildData(role), function (r) {
+                    if (r.success) {
+                        showMsg(role + " rolü eklendi.", false);
+                        setTimeout(function () { location.reload(); }, 800);
+                    } else {
+                        showMsg(r.message || "Hata oluştu.", true);
+                    }
+                }).fail(function () {
+                    showMsg("Sunucu hatası oluştu.", true);
+                });
+            });
+
+            // Rol kaldır
+            $(document).on("click", ".remove-role", function () {
+                var role = $(this).data("role");
+                if (!confirm(role + " rolünü kaldırmak istediğinize emin misiniz?")) return;
+                $.post('@Url.Action("RemoveRole", "UserManagement", new { area = "Admin" })', buildData(role), function (r) {
+                    if (r.success) {
+                        showMsg(role + " rolü kaldırıldı.", false);
+                        setTimeout(function () { location.reload(); }, 800);
+                    } else {
+                        showMsg(r.message || "Hata oluştu.", true);
+                    }
+                }).fail(function () {
+                    showMsg("Sunucu hatası oluştu.", true);
+                });
             });
         });
-        $('.remove-role').click(function() {
-          $.post('@Url.Action("RemoveRole")', getRequestData($(this).data('role')), function(r) {
-                if (r.success) location.reload(); else alert(r.message || 'Hata');
-            });
-        });
-    });
     </script>
-
 }

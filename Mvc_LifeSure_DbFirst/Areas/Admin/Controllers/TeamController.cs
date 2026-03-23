@@ -2,9 +2,6 @@
 using Mvc_LifeSure_DbFirst.Services.AdminLogServices;
 using Mvc_LifeSure_DbFirst.Services.TeamServices;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
@@ -14,22 +11,20 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         private readonly ITeamService _teamService;
 
         public TeamController(
-             IAdminLogService logService,
-             ITeamService teamService) : base(logService)
+            IAdminLogService logService,
+            ITeamService teamService) : base(logService)
         {
             _teamService = teamService;
         }
 
         public ActionResult Index()
         {
-            var testimonials = _teamService.GetAll();
-            return View(testimonials);
+            return View(_teamService.GetAll());
         }
+
         [HttpGet]
-        public ActionResult CreateTeam()
-        {
-            return View();
-        }
+        public ActionResult CreateTeam() => View();
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult CreateTeam(CreateTeamDto create)
@@ -38,12 +33,13 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             LogAction("Ekip kaydı oluşturuldu", "Create", "Teams");
             return RedirectToAction(nameof(Index));
         }
+
         [HttpGet]
-        public ActionResult UpdateTeam (int id)
+        public ActionResult UpdateTeam(int id)
         {
-            var teams = _teamService.GetById(id);
-            return View(teams);
+            return View(_teamService.GetById(id));   // BUG FIX: artık UpdateTeamDto döner
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdateTeam(UpdateTeamDto update)
@@ -52,6 +48,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             LogAction("Ekip kaydı güncellendi", "Update", "Teams", update.Id);
             return RedirectToAction(nameof(Index));
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteTeam(int id)

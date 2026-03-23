@@ -1,10 +1,7 @@
 ﻿using Mvc_LifeSure_DbFirst.Services.AdminLogServices;
 using Mvc_LifeSure_DbFirst.Services.PolicySaleDataServices;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 
 namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
@@ -20,6 +17,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             _saleDataService = saleDataService;
         }
 
+        // GET: Admin/DataGenerator
         public ActionResult Index()
         {
             ViewBag.TotalPolicies = _saleDataService.GetTotalPolicyCount();
@@ -27,25 +25,29 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             return View();
         }
 
+        // GET: Admin/DataGenerator/ViewData
+        public ActionResult ViewData()
+        {
+            return View(_saleDataService.GetAll());
+        }
+
+        // POST: Admin/DataGenerator/GeneratePolicies  (AJAX)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> GeneratePolicies(int count)
         {
+            if (count < 100 || count > 5000)
+                return Json(new { success = false, message = "Geçerli bir adet girin (100–5000)." });
+
             try
             {
-                var generatedCount = await _saleDataService.GeneratePoliciesFromGeminiAsync(count);
-
-                LogAction(
-                    $"{count} adet poliçe verisi oluşturuldu (Gerçekleşen: {generatedCount} kayıt)",
-                    "Generate",
-                    "PolicySaleData"
-                );
-
+                var generated = await _saleDataService.GeneratePoliciesFromGeminiAsync(count);
+                LogAction($"{count} adet poliçe verisi oluşturuldu (gerçekleşen: {generated})", "Generate", "PolicySaleData");
                 return Json(new
                 {
                     success = true,
-                    message = $"{count} adet poliçe verisi başarıyla oluşturuldu.",
-                    count = generatedCount
+                    message = $"{count} adet talep edildi; {generated} kayıt başarıyla oluşturuldu.",
+                    count = generated
                 });
             }
             catch (Exception ex)
@@ -54,6 +56,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
+        // POST: Admin/DataGenerator/ClearAllData  (AJAX)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ClearAllData()
@@ -61,25 +64,13 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             try
             {
                 _saleDataService.DeleteAll();
-
-                LogAction(
-                    "Tüm poliçe satış verileri silindi",
-                    "Clear",
-                    "PolicySaleData"
-                );
-
+                LogAction("Tüm poliçe satış verileri silindi", "Clear", "PolicySaleData");
                 return Json(new { success = true, message = "Tüm veriler başarıyla silindi." });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
             }
-        }
-
-        public ActionResult ViewData()
-        {
-            var data = _saleDataService.GetAll();
-            return View(data);
         }
     }
 }

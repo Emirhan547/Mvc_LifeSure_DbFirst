@@ -1,14 +1,10 @@
 ﻿using FluentValidation;
 using Mapster;
 using Mvc_LifeSure_DbFirst.Data.Entities;
-using Mvc_LifeSure_DbFirst.Dtos.AboutDtos;
 using Mvc_LifeSure_DbFirst.Dtos.BlogDtos;
 using Mvc_LifeSure_DbFirst.Repositories.BlogRepositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
 
 namespace Mvc_LifeSure_DbFirst.Services.BlogServices
 {
@@ -17,56 +13,49 @@ namespace Mvc_LifeSure_DbFirst.Services.BlogServices
         private readonly IBlogRepository _blogRepository;
         private readonly IValidator<CreateBlogDto> _createValidator;
         private readonly IValidator<UpdateBlogDto> _updateValidator;
-        public BlogService(IBlogRepository blogRepository, IValidator<CreateBlogDto> createValidator, IValidator<UpdateBlogDto> updateValidator)
+
+        public BlogService(
+            IBlogRepository blogRepository,
+            IValidator<CreateBlogDto> createValidator,
+            IValidator<UpdateBlogDto> updateValidator)
         {
             _blogRepository = blogRepository;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
         }
 
-        public void Create(CreateBlogDto create)
-        {
-            _createValidator.ValidateAndThrow(create);
-            var mappedBlogs = create.Adapt<Blog>();
-            _blogRepository.Create(mappedBlogs);
-        }
-
-        public void Delete(int id)
-        {
-            var abouts=_blogRepository.GetById(id);
-            if(abouts == null)
-            {
-                throw new Exception("Blogs Not Found");
-            }
-            _blogRepository.Delete(abouts);
-        }
-
         public List<ResultBlogDto> GetAll()
         {
-            var blogs = _blogRepository.GetAll();
-            return blogs.Adapt<List<ResultBlogDto>>();
-
+            return _blogRepository.GetAll().Adapt<List<ResultBlogDto>>();
         }
 
         public UpdateBlogDto GetById(int id)
         {
-           var blogs=_blogRepository.GetById(id);
-            if(blogs == null)
-            {
-                throw new Exception("Blogs Not Found");
-            }
-            return blogs.Adapt<UpdateBlogDto>();
+            var blog = _blogRepository.GetById(id)
+                ?? throw new KeyNotFoundException($"Blog kaydı bulunamadı (Id: {id})");
+            return blog.Adapt<UpdateBlogDto>();
+        }
+
+        public void Create(CreateBlogDto create)
+        {
+            _createValidator.ValidateAndThrow(create);
+            _blogRepository.Create(create.Adapt<Blog>());
         }
 
         public void Update(UpdateBlogDto update)
         {
             _updateValidator.ValidateAndThrow(update);
-            var blogs = _blogRepository.GetById(update.Id);
-            if( blogs == null)
-            {
-                throw new Exception("Blogs Not Fount");
-            }
-            update.Adapt(blogs);
+            var blog = _blogRepository.GetById(update.Id)
+                ?? throw new KeyNotFoundException($"Blog kaydı bulunamadı (Id: {update.Id})");
+            update.Adapt(blog);
+            _blogRepository.Update(blog);   // BUG FIX: eksik çağrı eklendi
+        }
+
+        public void Delete(int id)
+        {
+            var blog = _blogRepository.GetById(id)
+                ?? throw new KeyNotFoundException($"Blog kaydı bulunamadı (Id: {id})");
+            _blogRepository.Delete(blog);
         }
     }
 }

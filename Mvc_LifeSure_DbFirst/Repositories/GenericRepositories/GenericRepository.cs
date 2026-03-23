@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Web;
 
 namespace Mvc_LifeSure_DbFirst.Repositories.GenericRepositories
 {
@@ -15,33 +14,31 @@ namespace Mvc_LifeSure_DbFirst.Repositories.GenericRepositories
 
         public GenericRepository(AppDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _table = _context.Set<TEntity>();
         }
-        public List<TEntity> GetAll()
-        {
-            return _table.ToList();
-        }
 
-        public TEntity GetById(int id)
-        {
-            return _table.Find(id);
-        }
+        public List<TEntity> GetAll() => _table.ToList();
+
+        public TEntity GetById(int id) => _table.Find(id);
 
         public void Create(TEntity entity)
         {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             _table.Add(entity);
             _context.SaveChanges();
         }
 
         public void Update(TEntity entity)
         {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             _context.Entry(entity).State = EntityState.Modified;
             _context.SaveChanges();
         }
 
         public void Delete(TEntity entity)
         {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             _table.Remove(entity);
             _context.SaveChanges();
         }
