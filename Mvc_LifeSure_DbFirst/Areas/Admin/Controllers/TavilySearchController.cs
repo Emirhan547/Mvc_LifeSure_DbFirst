@@ -26,6 +26,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> Search(string query, int maxResults = 5)
         {
             try
@@ -58,6 +59,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> QuickAnswer(string query)
         {
             try
@@ -85,6 +87,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> SearchNews(string topic, int days = 7)
         {
             try
@@ -101,11 +104,12 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> SearchInsuranceNews()
         {
             try
             {
-                var query = "sigorta sektörü güncel haberler 2025";
+                var query = $"sigorta sektörü güncel haberler {DateTime.Now.Year}";
                 var result = await _tavilyService.SearchAsync(query, 8);
 
                 return Json(new { success = true, data = result });

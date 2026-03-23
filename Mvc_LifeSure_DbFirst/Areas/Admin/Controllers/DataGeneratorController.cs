@@ -28,6 +28,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> GeneratePolicies(int count)
         {
             try
@@ -54,6 +55,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult ClearAllData()
         {
             try

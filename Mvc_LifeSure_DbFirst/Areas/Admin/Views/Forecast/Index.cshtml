@@ -62,7 +62,12 @@
         text-align: center;
     }
 </style>
-
+@using (Html.BeginForm("ExportForecast", "Forecast", FormMethod.Post, new { id = "exportForecastForm" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="city" id="exportCity" />
+    <input type="hidden" name="months" id="exportMonths" />
+}
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <!-- Kontrol Kartı -->
@@ -177,7 +182,12 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
+            var antiForgeryToken = $("#exportForecastForm input[name='__RequestVerificationToken']").val();
+
+            function getRequestData(data) {
+                return $.extend({ __RequestVerificationToken: antiForgeryToken }, data);
+            }
             var chart = null;
 
             // Tahmin butonu
@@ -227,7 +237,9 @@
                     return;
                 }
 
-                window.location.href = '@Url.Action("ExportForecast")?city=' + city + '&months=' + months;
+                $("#exportCity").val(city);
+                $("#exportMonths").val(months);
+                $("#exportForecastForm").submit();
             });
 
             function getForecast(city, months) {
@@ -241,7 +253,7 @@
                 $.ajax({
                     url: '@Url.Action("GetForecast")',
                     type: 'POST',
-                    data: { city: city, months: months },
+                    data: getRequestData({ city: city, months: months }),
                     success: function(response) {
                         $("#loading").addClass("d-none");
 
@@ -377,7 +389,7 @@
                 $.ajax({
                     url: '@Url.Action("TrainModel")',
                     type: 'POST',
-                    data: { city: city },
+                    data: getRequestData({ city: city }),
                     success: function(response) {
                         $("#loading").addClass("d-none");
 
@@ -405,7 +417,7 @@
                 $.ajax({
                     url: '@Url.Action("ValidateForecast")',
                     type: 'POST',
-                    data: { city: city },
+                    data: getRequestData({ city: city }),
                     success: function(response) {
                         if(response.success) {
                             alert(`${city} için tahmin doğruluğu: %${response.accuracy}`);

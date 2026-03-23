@@ -112,6 +112,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> ToggleStatus(string id)
         {
             try
@@ -135,6 +136,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(string id)
         {
             try
@@ -178,6 +180,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddRole(string userId, string role)
         {
             try
@@ -204,6 +207,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> RemoveRole(string userId, string role)
         {
             try

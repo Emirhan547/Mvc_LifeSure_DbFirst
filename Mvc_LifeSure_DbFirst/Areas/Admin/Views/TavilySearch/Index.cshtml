@@ -76,7 +76,10 @@
         }
     }
 </style>
-
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "antiForgeryForm", style = "display:none;" }))
+{
+    @Html.AntiForgeryToken()
+}
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <!-- Arama Kartı -->
@@ -123,7 +126,7 @@
                         <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="sigorta sektörü son dakika haberleri">
                             <i class="fas fa-newspaper me-1 text-primary"></i>Sigorta Haberleri
                         </span>
-                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="trafik sigortası fiyatları 2025">
+                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="trafik sigortası fiyatları @DateTime.Now.Year">
                             <i class="fas fa-car me-1 text-primary"></i>Trafik Sigortası
                         </span>
                         <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="özel sağlık sigortası kampanyaları">
@@ -132,7 +135,7 @@
                         <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="konut sigortası zorunlu mu">
                             <i class="fas fa-home me-1 text-primary"></i>Konut Sigortası
                         </span>
-                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="dask fiyatları 2025">
+                        <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="dask fiyatları @DateTime.Now.Year">
                             <i class="fas fa-house-damage me-1 text-primary"></i>DASK
                         </span>
                         <span class="badge bg-light text-dark p-3 quick-search-btn" data-query="kasko fiyat hesaplama">
@@ -192,8 +195,8 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="2025 sigorta trendleri">
-                                <i class="fas fa-chart-line me-2 text-primary"></i>2025 Sigorta Trendleri
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="@DateTime.Now.Year sigorta trendleri">
+                                <i class="fas fa-chart-line me-2 text-primary"></i>@DateTime.Now.Year Sigorta Trendleri
                             </a>
                             <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="yapay zeka sigorta sektörü">
                                 <i class="fas fa-brain me-2 text-primary"></i>Yapay Zeka ve Sigorta
@@ -205,8 +208,8 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="en iyi sigorta şirketleri 2025">
-                                <i class="fas fa-trophy me-2 text-primary"></i>En İyi Sigorta Şirketleri
+                            <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="en iyi sigorta şirketleri @DateTime.Now.Year">
+                                <i class="fas fa-trophy me-2 text-primary"></i>En İyi Sigorta Şirketleri (@DateTime.Now.Year)
                             </a>
                             <a href="#" class="list-group-item list-group-item-action quick-search-btn" data-query="sigorta primi hesaplama">
                                 <i class="fas fa-calculator me-2 text-primary"></i>Prim Hesaplama
@@ -254,7 +257,12 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
+            var antiForgeryToken = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
+
+            function getRequestData(data) {
+                return $.extend({ __RequestVerificationToken: antiForgeryToken }, data);
+            }
             // Arama butonu tıklama
             $("#searchBtn").click(performSearch);
 
@@ -294,10 +302,10 @@
                 $.ajax({
                     url: '@Url.Action("Search", "TavilySearch")',
                     type: 'POST',
-                    data: {
+                    data: getRequestData({
                         query: query,
                         maxResults: maxResults
-                    },
+                    }),
                     success: function(response) {
                         $("#loading").addClass("d-none");
 
@@ -373,6 +381,7 @@
                 $.ajax({
                     url: '@Url.Action("SearchInsuranceNews", "TavilySearch")',
                     type: 'POST',
+                    data: getRequestData({}),
                     success: function(response) {
                         if(response.success) {
                             // İsteğe bağlı olarak sidebar'da gösterebilirsiniz

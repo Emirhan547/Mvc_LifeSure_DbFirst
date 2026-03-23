@@ -5,88 +5,96 @@
     ViewBag.BreadcrumbTitle = "Kullanıcı Listesi";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "antiForgeryForm", style = "display:none;" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+<div class="p-8 space-y-6">
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+        <h1 class="text-2xl font-bold">Kullanıcı Yönetimi</h1>
+        <p class="mt-1 text-sm text-white/90">Kullanıcıları görüntüleyin, rollerini yönetin ve durumlarını güncelleyin.</p>
+    </div>
 
 
-        <div class="p-8 space-y-6">
-            <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
-                <h1 class="text-2xl font-bold">Kullanıcı Yönetimi</h1>
-                <p class="mt-1 text-sm text-white/90">Kullanıcıları görüntüleyin, rollerini yönetin ve durumlarını güncelleyin.</p>
-            </div>
-           
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between gap-3">
+            <h2 class="text-lg font-semibold text-slate-800">Kullanıcı Listesi</h2>
+            <input type="text" id="searchInput" class="w-full max-w-xs rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="Kullanıcı ara...">
+        </div>
 
-                            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                                <div class="p-5 border-b border-slate-200 flex items-center justify-between gap-3">
-                                    <h2 class="text-lg font-semibold text-slate-800">Kullanıcı Listesi</h2>
-                                    <input type="text" id="searchInput" class="w-full max-w-xs rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="Kullanıcı ara...">
-                                </div>
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[1000px] text-sm" id="userTable">
+                <thead class="bg-slate-50 text-slate-700 font-semibold">
+                    <tr>
 
-                                <div class="overflow-x-auto">
-                                    <table class="w-full min-w-[1000px] text-sm" id="userTable">
-                                        <thead class="bg-slate-50 text-slate-700 font-semibold">
-                                            <tr>
-                                                
-                                                <th class="px-4 py-3 text-left">Ad Soyad</th>
-                                                <th class="px-4 py-3 text-left">Kullanıcı Adı</th>
-                                                <th class="px-4 py-3 text-left">Email</th>
-                                                <th class="px-4 py-3 text-left">Şehir</th>
-                                                <th class="px-4 py-3 text-left">Poliçe Sayısı</th>
-                                                <th class="px-4 py-3 text-left">Durum</th>
-                                                <th class="px-4 py-3 text-left">Kayıt Tarihi</th>
-                                                <th class="px-4 py-3 text-right">İşlemler</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if (Model != null && Model.Any())
-                                            {
-                                                foreach (var user in Model)
-                                                {
-                                                   
-                                                    <tr class="border-t border-slate-100 hover:bg-slate-50/70">
-                                                        <td class="px-4 py-3 text-slate-600">@user.FirstName @user.LastName</td>
-                                                        <td class="px-4 py-3 text-slate-600">@user.UserName</td>
-                                                        <td class="px-4 py-3 text-slate-600">@user.Email</td>
-                                                        <td class="px-4 py-3 text-slate-600">@(user.City ?? "-")</td>
-                                                        <td class="px-4 py-3 text-slate-600">@user.PolicyCount</td>
-                                                        <td class="px-4 py-3">
-                                                            @if (user.IsActive)
-                                                            {
-                                                                <span class="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-medium">Aktif</span>
-                                                            }
-                                                            else
-                                                            {
-                                                                <span class="px-2 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-medium">Pasif</span>
-                                                            }
-                                                        </td>
-                                                        
-                                                        <td class="px-4 py-3 text-slate-600">@user.CreatedAt.ToString("dd.MM.yyyy")</td>
-                                                        <td class="px-4 py-3">
-                                                            <div class="flex justify-end gap-2 flex-wrap">
-                                                                <a href="@Url.Action("Details", new { id = user.Id })" class="px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700 font-medium">Detay</a>
-                                                                <a href="@Url.Action("Edit", new { id = user.Id })" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 font-medium">Düzenle</a>
-                                                                <a href="@Url.Action("ManageRoles", new { id = user.Id })" class="px-3 py-1.5 rounded-lg bg-violet-100 text-violet-700 font-medium">Roller</a>
-                                                                <button class="px-3 py-1.5 rounded-lg @(user.IsActive ? "bg-slate-200 text-slate-700" : "bg-emerald-100 text-emerald-700") font-medium toggle-status" data-user-id="@user.Id" data-status="@user.IsActive">@(user.IsActive ? "Pasif Yap" : "Aktif Yap")</button>
-                                                                <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium delete-user" data-user-id="@user.Id">Sil</button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    }
-                                                    }
-                                                    else
-                                                    {
-                                                    <tr>
-                                                       
-                                                        <td colspan="8" class="px-4 py-10 text-center text-slate-500">Henüz kullanıcı kaydı bulunmuyor.</td>
-                                                    </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </div>
+                        <th class="px-4 py-3 text-left">Ad Soyad</th>
+                        <th class="px-4 py-3 text-left">Kullanıcı Adı</th>
+                        <th class="px-4 py-3 text-left">Email</th>
+                        <th class="px-4 py-3 text-left">Şehir</th>
+                        <th class="px-4 py-3 text-left">Poliçe Sayısı</th>
+                        <th class="px-4 py-3 text-left">Durum</th>
+                        <th class="px-4 py-3 text-left">Kayıt Tarihi</th>
+                        <th class="px-4 py-3 text-right">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var user in Model)
+                        {
+
+                            <tr class="border-t border-slate-100 hover:bg-slate-50/70">
+                                <td class="px-4 py-3 text-slate-600">@user.FirstName @user.LastName</td>
+                                <td class="px-4 py-3 text-slate-600">@user.UserName</td>
+                                <td class="px-4 py-3 text-slate-600">@user.Email</td>
+                                <td class="px-4 py-3 text-slate-600">@(user.City ?? "-")</td>
+                                <td class="px-4 py-3 text-slate-600">@user.PolicyCount</td>
+                                <td class="px-4 py-3">
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-medium">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="px-2 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-medium">Pasif</span>
+                                    }
+                                </td>
+
+                                <td class="px-4 py-3 text-slate-600">@user.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex justify-end gap-2 flex-wrap">
+                                        <a href="@Url.Action("Details", new { id = user.Id })" class="px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700 font-medium">Detay</a>
+                                        <a href="@Url.Action("Edit", new { id = user.Id })" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 font-medium">Düzenle</a>
+                                        <a href="@Url.Action("ManageRoles", new { id = user.Id })" class="px-3 py-1.5 rounded-lg bg-violet-100 text-violet-700 font-medium">Roller</a>
+                                        <button class="px-3 py-1.5 rounded-lg @(user.IsActive ? "bg-slate-200 text-slate-700" : "bg-emerald-100 text-emerald-700") font-medium toggle-status" data-user-id="@user.Id" data-status="@user.IsActive">@(user.IsActive ? "Pasif Yap" : "Aktif Yap")</button>
+                                        <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium delete-user" data-user-id="@user.Id">Sil</button>
                                     </div>
-                        </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
 
-                        @section Scripts {
-                            <script>
-        $(document).ready(function() {
+                            <td colspan="8" class="px-4 py-10 text-center text-slate-500">Henüz kullanıcı kaydı bulunmuyor.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var antiForgeryToken = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
+
+            function getRequestData(data) {
+                return $.extend({ __RequestVerificationToken: antiForgeryToken }, data);
+            }
             // Arama
             $("#searchInput").on("keyup", function() {
                 var value = $(this).val().toLowerCase();
@@ -105,7 +113,7 @@
                     $.ajax({
                         url: '@Url.Action("ToggleStatus", "UserManagement")',
                         type: 'POST',
-                        data: { id: userId },
+                        data: getRequestData({ id: userId }),
                         success: function(response) {
                             if (response.success) {
                                 location.reload();
@@ -122,14 +130,14 @@
 
             // Silme
             $(".delete-user").click(function() {
-               
+
                 var userId = $(this).data("user-id");
 
                 if (confirm("Bu kullanıcıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) {
                     $.ajax({
                         url: '@Url.Action("Delete", "UserManagement")',
                         type: 'POST',
-                        data: { id: userId },
+                        data: getRequestData({ id: userId }),
                         success: function(response) {
                             if (response.success) {
                                 location.reload();
@@ -144,6 +152,6 @@
                 }
             });
         });
-                            </script>
-                        
-                    }
+    </script>
+
+}

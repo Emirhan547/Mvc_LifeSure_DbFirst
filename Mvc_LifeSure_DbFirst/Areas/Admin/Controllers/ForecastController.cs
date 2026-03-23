@@ -37,6 +37,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> GetForecast(string city, int months = 3)
         {
             try
@@ -58,6 +59,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> GetAllForecasts(int months = 3)
         {
             try
@@ -72,6 +74,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> GetYearlyForecast(int year)
         {
             try
@@ -86,6 +89,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> TrainModel(string city)
         {
             try
@@ -107,6 +111,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> ValidateForecast(string city, int months = 6)
         {
             try
@@ -125,6 +130,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> ExportForecast(string city, int months)
         {
             try
@@ -151,6 +157,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> GetDashboardData()
         {
             try

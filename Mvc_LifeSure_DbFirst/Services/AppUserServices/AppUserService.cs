@@ -36,18 +36,24 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
 
         public async Task<List<ResultAppUserDto>> GetAllUsersAsync()
         {
-            var users = await _context.Users.ToListAsync();
-            var result = new List<ResultAppUserDto>();
+            var users = await _context.Users
+                 .Select(user => new ResultAppUserDto
+                 {
+                     Id = user.Id,
+                     FirstName = user.FirstName,
+                     LastName = user.LastName,
+                     Email = user.Email,
+                     UserName = user.UserName,
+                     City = user.City,
+                     BirthDate = user.BirthDate,
+                     PhoneNumber = user.PhoneNumber,
+                     CreatedAt = user.CreatedAt,
+                     IsActive = user.IsActive,
+                     PolicyCount = _context.Policies.Count(policy => policy.UserId == user.Id)
+                 })
+                 .ToListAsync();
 
-            foreach (var user in users)
-            {
-                var policyCount = await _context.Policies.CountAsync(p => p.UserId == user.Id);
-                var userDto = user.Adapt<ResultAppUserDto>();
-                userDto.PolicyCount = policyCount;
-                result.Add(userDto);
-            }
-
-            return result;
+            return users;
         }
 
         public async Task<ResultAppUserDto> GetUserByIdAsync(string id)
@@ -83,19 +89,23 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
         {
             var users = await _context.Users
                 .Where(u => u.City == city)
+                .Select(user => new ResultAppUserDto
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    UserName = user.UserName,
+                    City = user.City,
+                    BirthDate = user.BirthDate,
+                    PhoneNumber = user.PhoneNumber,
+                    CreatedAt = user.CreatedAt,
+                    IsActive = user.IsActive,
+                    PolicyCount = _context.Policies.Count(policy => policy.UserId == user.Id)
+                })
                 .ToListAsync();
 
-            var result = new List<ResultAppUserDto>();
-
-            foreach (var user in users)
-            {
-                var policyCount = await _context.Policies.CountAsync(p => p.UserId == user.Id);
-                var userDto = user.Adapt<ResultAppUserDto>();
-                userDto.PolicyCount = policyCount;
-                result.Add(userDto);
-            }
-
-            return result;
+            return users;
         }
 
         public async Task UpdateUserAsync(UpdateAppUserDto updateDto)
@@ -146,6 +156,8 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
 
             user.IsActive = !user.IsActive;
             var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                throw new Exception(string.Join(", ", result.Errors));
 
             return user.IsActive;
         }

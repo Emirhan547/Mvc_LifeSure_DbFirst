@@ -16,10 +16,10 @@ namespace Mvc_LifeSure_DbFirst.Repositories.AdminLogRepositories
         {
             _context = context;
         }
-        public List<AdminLog> GetLogsByAdmin(string adminUserName)
+        public List<AdminLog> GetLogsByAdmin(string adminIdentifier)
         {
             return _context.AdminLogs
-                .Where(x => x.AdminUserName == adminUserName)
+               .Where(x => x.UserId == adminIdentifier || x.AdminUserName == adminIdentifier)
                 .OrderByDescending(x => x.Timestamp)
                 .ToList();
         }

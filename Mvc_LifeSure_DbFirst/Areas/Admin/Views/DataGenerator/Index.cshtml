@@ -30,6 +30,10 @@
         background: #f8fafc !important
     }
 </style>
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "antiForgeryForm", style = "display:none;" }))
+{
+    @Html.AntiForgeryToken()
+}
 <div class="row">
     <div class="col-lg-8 mx-auto">
         <div class="card mb-4">
@@ -105,8 +109,12 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        $(document).ready(function() {
-            // Form submit
+        $(document).ready(function () {
+            var antiForgeryToken = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
+
+            function getRequestData(data) {
+                return $.extend({ __RequestVerificationToken: antiForgeryToken }, data);
+            }
             $("#generateForm").submit(function(e) {
                 e.preventDefault();
 
@@ -131,7 +139,7 @@
                 $.ajax({
                     url: '@Url.Action("GeneratePolicies")',
                     type: 'POST',
-                    data: { count: count },
+                    data: getRequestData({ count: count }),
                     success: function(response) {
                         clearInterval(interval);
                         $("#progress").css("width", "100%").text("100%");
@@ -175,6 +183,7 @@
                 $.ajax({
                     url: '@Url.Action("ClearAllData")',
                     type: 'POST',
+                    data: getRequestData({}),
                     success: function(response) {
                         if (response.success) {
                             alert(response.message);

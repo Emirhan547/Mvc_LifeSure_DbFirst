@@ -1,4 +1,5 @@
 ﻿using Mvc_LifeSure_DbFirst.Dtos.SliderDtos;
+using Mvc_LifeSure_DbFirst.Services.AdminLogServices;
 using Mvc_LifeSure_DbFirst.Services.SliderServices;
 using System;
 using System.Collections.Generic;
@@ -8,11 +9,13 @@ using System.Web.Mvc;
 
 namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
 {
-    public class SliderController : Controller
+    public class SliderController : AdminBaseController
     {
         private readonly ISliderService _sliderService;
 
-        public SliderController(ISliderService sliderService)
+        public SliderController(
+             IAdminLogService logService,
+             ISliderService sliderService) : base(logService)
         {
             _sliderService = sliderService;
         }
@@ -28,9 +31,11 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult CreateSlider(CreateSliderDto create)
         {
             _sliderService.Create(create);
+            LogAction("Slider kaydı oluşturuldu", "Create", "Sliders");
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
@@ -40,15 +45,19 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             return View(sliders);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult UpdateSlider(UpdateSliderDto update)
         {
             _sliderService.Update(update);
+            LogAction("Slider kaydı güncellendi", "Update", "Sliders", update.Id);
             return RedirectToAction(nameof(Index));
         }
-       
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult DeleteSlider(int id)
         {
             _sliderService.Delete(id);
+            LogAction("Slider kaydı silindi", "Delete", "Sliders", id);
             return RedirectToAction(nameof(Index));
         }
     }

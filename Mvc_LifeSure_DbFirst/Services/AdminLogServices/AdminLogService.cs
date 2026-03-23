@@ -70,6 +70,7 @@ namespace Mvc_LifeSure_DbFirst.Services.AdminLogServices
             var log = new CreateAdminLogDto
             {
                 UserId = userId,
+                AdminUserName = HttpContext.Current?.User?.Identity?.Name,
                 Action = action,
                 ActionType = actionType,
                 TableName = tableName,

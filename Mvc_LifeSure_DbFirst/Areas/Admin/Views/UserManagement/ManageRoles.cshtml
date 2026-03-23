@@ -10,54 +10,63 @@
     var userRoles = ViewBag.UserRoles as IList<string>;
     var allRoles = ViewBag.AllRoles as IList<string>;
 }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "antiForgeryForm", style = "display:none;" }))
+{
+    @Html.AntiForgeryToken()
+}
 
 
-        <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
-            <h1 class="text-2xl font-bold">Rol Yönetimi</h1>
-            <p class="mt-1 text-sm text-white/90"><strong>@userName</strong> için rol atama ve kaldırma işlemleri.</p>
-        </div>
+<div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
+    <h1 class="text-2xl font-bold">Rol Yönetimi</h1>
+    <p class="mt-1 text-sm text-white/90"><strong>@userName</strong> için rol atama ve kaldırma işlemleri.</p>
+</div>
 
-        
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-                    <h3 class="font-semibold text-slate-800 mb-3">Mevcut Roller</h3>
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        @if (userRoles != null && userRoles.Any())
-                        {
-                            foreach (var role in userRoles)
-                            {
-                                <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium remove-role" data-role="@role">@role (Kaldır)</button>
-                            }
-                        }
-                        else
-                        {
-                            <span class="text-slate-500">Rol bulunmuyor.</span>
-                        }
-                    </div>
 
-                    <h3 class="font-semibold text-slate-800 mb-3">Rol Ekle</h3>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach (var role in allRoles ?? new List<string>())
-                        {
-                            <button class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-medium add-role" data-role="@role">@role Ekle</button>
-                        }
-                    </div>
-                </div>
-           
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <h3 class="font-semibold text-slate-800 mb-3">Mevcut Roller</h3>
+    <div class="flex flex-wrap gap-2 mb-6">
+        @if (userRoles != null && userRoles.Any())
+        {
+            foreach (var role in userRoles)
+            {
+                <button class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 font-medium remove-role" data-role="@role">@role (Kaldır)</button>
+            }
+        }
+        else
+        {
+            <span class="text-slate-500">Rol bulunmuyor.</span>
+        }
+    </div>
 
-            @section Scripts {
-                <script>
-    $(function() {
+    <h3 class="font-semibold text-slate-800 mb-3">Rol Ekle</h3>
+    <div class="flex flex-wrap gap-2">
+        @foreach (var role in allRoles ?? new List<string>())
+        {
+            <button class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-medium add-role" data-role="@role">@role Ekle</button>
+        }
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(function () {
+         var antiForgeryToken = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
+
+        function getRequestData(role) {
+            return { __RequestVerificationToken: antiForgeryToken, userId: '@userId', role: role };
+        }
         $('.add-role').click(function() {
-            $.post('@Url.Action("AddRole")', { userId: '@userId', role: $(this).data('role') }, function(r) {
+           $.post('@Url.Action("AddRole")', getRequestData($(this).data('role')), function(r) {
                 if (r.success) location.reload(); else alert(r.message || 'Hata');
             });
         });
         $('.remove-role').click(function() {
-            $.post('@Url.Action("RemoveRole")', { userId: '@userId', role: $(this).data('role') }, function(r) {
+          $.post('@Url.Action("RemoveRole")', getRequestData($(this).data('role')), function(r) {
                 if (r.success) location.reload(); else alert(r.message || 'Hata');
             });
         });
     });
-                </script>
-            
-            }
+    </script>
+
+}

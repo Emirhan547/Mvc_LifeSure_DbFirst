@@ -1,4 +1,5 @@
 ﻿using Mvc_LifeSure_DbFirst.Dtos.ServiceDtos;
+using Mvc_LifeSure_DbFirst.Services.AdminLogServices;
 using Mvc_LifeSure_DbFirst.Services.ServiceServices;
 using System;
 using System.Collections.Generic;
@@ -8,11 +9,13 @@ using System.Web.Mvc;
 
 namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
 {
-    public class ServiceController : Controller
+    public class ServiceController : AdminBaseController
     {
         private readonly IServicesService _services;
 
-        public ServiceController(IServicesService services)
+        public ServiceController(
+             IAdminLogService logService,
+             IServicesService services) : base(logService)
         {
             _services = services;
         }
@@ -28,9 +31,11 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult CreateService(CreateServicesDto create)
         {
             _services.Create(create);
+            LogAction("Hizmet kaydı oluşturuldu", "Create", "Services");
             return RedirectToAction(nameof(Index));
         }
 
@@ -41,14 +46,19 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             return View(services);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult UpdateService(UpdateServicesDto update)
         {
             _services.Update(update);
+            LogAction("Hizmet kaydı güncellendi", "Update", "Services", update.Id);
             return RedirectToAction(nameof(Index));
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult DeleteService(int id)
         {
             _services.Delete(id);
+            LogAction("Hizmet kaydı silindi", "Delete", "Services", id);
             return RedirectToAction(nameof(Index));
         }
     }
