@@ -1,4 +1,5 @@
-﻿using Mvc_LifeSure_DbFirst.Dtos.MLDtos;
+﻿using Mvc_LifeSure_DbFirst.Dtos.CommonDtos;
+using Mvc_LifeSure_DbFirst.Dtos.MLDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,5 +26,7 @@ namespace Mvc_LifeSure_DbFirst.Services.MLServices
 
         // Excel/CSV export için tahmin verileri
         Task<byte[]> ExportForecastToExcelAsync(string city, int months);
+        List<string> GetAvailableCities();
+        DateRangeDto GetValidationDateRange(int months);
     }
 }

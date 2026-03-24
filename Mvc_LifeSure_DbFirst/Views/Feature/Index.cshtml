@@ -3,32 +3,39 @@
 <div class="container-fluid feature bg-light py-5">
     <div class="container py-5">
         <div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.2s" style="max-width: 800px;">
-            <h4 class="text-primary">Our Features</h4>
-            <h1 class="display-4 mb-4">Insurance Provide you a Better Future</h1>
-          
+            <h4 class="text-primary">Özelliklerimiz</h4>
+            <h1 class="display-4 mb-4">Sigorta ile Daha Güvenli Bir Gelecek</h1>
         </div>
+
         <div class="row g-4">
-           
-                        @if (Model != null)
-                        {
-                            var delay = 2;
-                            foreach (var item in Model)
-                            {
-                                <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.@(delay)s">
-                                    <div class="feature-item p-4 pt-0">
-                                        <div class="feature-icon p-4 mb-4">
-                                            <i class="@item.Icon fa-3x"></i>
-                                        </div>
-                                        <h4 class="mb-4">@item.Title</h4>
-                                        <p class="mb-4">@item.Description</p>
-                                        <a class="btn btn-primary rounded-pill py-2 px-4" href="#">Learn More</a>
-                                    </div>
-                                </div>
-                               
-                        delay += 2;
-                    }
-                }
+
+            @if (Model != null)
+            {
+                var delay = 2;
+
+                foreach (var item in Model)
+                {
+                    <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.@(delay)s">
+                        <div class="feature-item p-4 pt-0">
+
+                            <div class="feature-icon p-4 mb-4">
+                                <i class="@item.Icon fa-3x"></i>
+                            </div>
+
+                            <h4 class="mb-4">@item.Title</h4>
+                            <p class="mb-4">@item.Description</p>
+
+                            <a class="btn btn-primary rounded-pill py-2 px-4" href="#">
+                                Daha Fazla
+                            </a>
+
+                        </div>
                     </div>
-                </div>
-            </div>
-      
+
+                    delay += 2;
+                }
+            }
+
+        </div>
+    </div>
+</div>

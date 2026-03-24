@@ -1,4 +1,5 @@
 ﻿using Mvc_LifeSure_DbFirst.Data.Context;
+using Mvc_LifeSure_DbFirst.Dtos.CommonDtos;
 using Mvc_LifeSure_DbFirst.Dtos.MLDtos;
 using Mvc_LifeSure_DbFirst.Repositories.PolicySaleDataRepositories;
 using System;
@@ -172,6 +173,25 @@ namespace Mvc_LifeSure_DbFirst.Services.MLServices
             }
 
             return Encoding.UTF8.GetBytes(sb.ToString());
+        }
+        public List<string> GetAvailableCities()
+        {
+            return _repository.GetAll()
+                .Select(x => x.City)
+                .Where(city => !string.IsNullOrWhiteSpace(city))
+                .Distinct()
+                .OrderBy(city => city)
+                .ToList();
+        }
+
+        public DateRangeDto GetValidationDateRange(int months)
+        {
+            var endDate = DateTime.Now.AddMonths(-1);
+            return new DateRangeDto
+            {
+                StartDate = endDate.AddMonths(-months * 2),
+                EndDate = endDate
+            };
         }
     }
 }

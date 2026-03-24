@@ -20,46 +20,27 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
     {
         private readonly AppDbContext _context;
         private readonly UserManager<AppUser, string> _userManager;
-        private readonly IPolicyRepository _policyRepository;
         private readonly IValidator<UpdateAppUserDto> _updateValidator;
 
         public AppUserService(
-      AppDbContext context,
-      IPolicyRepository policyRepository,
-      IValidator<UpdateAppUserDto> updateValidator,
-      AppUserManager userManager)
+     AppDbContext context,
+            IValidator<UpdateAppUserDto> updateValidator,
+            AppUserManager userManager)
         {
-            _context = context; // artık protected property’ye gerek yok
+            _context = context; 
             _userManager = userManager;
-            _policyRepository = policyRepository;
             _updateValidator = updateValidator;
         }
 
         public async Task<List<ResultAppUserDto>> GetAllUsersAsync()
         {
-            var users = await _context.Users
-                 .Select(user => new ResultAppUserDto
-                 {
-                     Id = user.Id,
-                     FirstName = user.FirstName,
-                     LastName = user.LastName,
-                     Email = user.Email,
-                     UserName = user.UserName,
-                     City = user.City,
-                     BirthDate = user.BirthDate,
-                     PhoneNumber = user.PhoneNumber,
-                     CreatedAt = user.CreatedAt,
-                     IsActive = user.IsActive,
-                     PolicyCount = _context.Policies.Count(policy => policy.UserId == user.Id)
-                 })
-                 .ToListAsync();
-
-            return users;
+            return await ProjectUsers(_context.Users)
+                .ToListAsync();
         }
 
         public async Task<ResultAppUserDto> GetUserByIdAsync(string id)
         {
-            var user =  _context.Users.Find(id);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
                 throw new KeyNotFoundException("Kullanıcı bulunamadı");
 
@@ -87,26 +68,11 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
 
         public async Task<List<ResultAppUserDto>> GetUsersByCityAsync(string city)
         {
-            var users = await _context.Users
-                .Where(u => u.City == city)
-                .Select(user => new ResultAppUserDto
-                {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    UserName = user.UserName,
-                    City = user.City,
-                    BirthDate = user.BirthDate,
-                    PhoneNumber = user.PhoneNumber,
-                    CreatedAt = user.CreatedAt,
-                    IsActive = user.IsActive,
-                    PolicyCount = _context.Policies.Count(policy => policy.UserId == user.Id)
-                })
+            return await ProjectUsers(_context.Users.Where(user => user.City == city))
                 .ToListAsync();
 
            
-            return users;
+          
         }
 
         public async Task UpdateUserAsync(UpdateAppUserDto updateDto)
@@ -129,8 +95,7 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
             user.IsActive = updateDto.IsActive;
 
             var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-                throw new Exception(string.Join(", ", result.Errors));
+            EnsureIdentityResult(result);
         }
 
         public async Task DeleteUserAsync(string id)
@@ -145,8 +110,7 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
                 throw new InvalidOperationException("Bu kullanıcının aktif poliçeleri bulunmaktadır. Önce poliçeleri silin veya başka kullanıcıya aktarın.");
 
             var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
-                throw new Exception(string.Join(", ", result.Errors));
+            EnsureIdentityResult(result);
         }
 
         public async Task<bool> ToggleUserStatusAsync(string id)
@@ -157,8 +121,7 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
 
             user.IsActive = !user.IsActive;
             var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-                throw new Exception(string.Join(", ", result.Errors));
+            EnsureIdentityResult(result);
 
             return user.IsActive;
         }
@@ -166,6 +129,69 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
         public async Task<int> GetTotalUserCountAsync()
         {
             return await _context.Users.CountAsync();
+        }
+        public async Task<IList<string>> GetUserRolesAsync(string id)
+        {
+            var user = await EnsureUserExistsAsync(id);
+            return await _userManager.GetRolesAsync(user.Id);
+        }
+
+        public async Task AddUserToRoleAsync(string userId, string role)
+        {
+            await EnsureRoleAssignmentInputAsync(userId, role);
+            var result = await _userManager.AddToRoleAsync(userId, role);
+            EnsureIdentityResult(result);
+        }
+
+        public async Task RemoveUserFromRoleAsync(string userId, string role)
+        {
+            await EnsureRoleAssignmentInputAsync(userId, role);
+            var result = await _userManager.RemoveFromRoleAsync(userId, role);
+            EnsureIdentityResult(result);
+        }
+
+        private IQueryable<ResultAppUserDto> ProjectUsers(IQueryable<AppUser> users)
+        {
+            return users.Select(user => new ResultAppUserDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                UserName = user.UserName,
+                City = user.City,
+                BirthDate = user.BirthDate,
+                PhoneNumber = user.PhoneNumber,
+                CreatedAt = user.CreatedAt,
+                IsActive = user.IsActive,
+                PolicyCount = _context.Policies.Count(policy => policy.UserId == user.Id)
+            });
+        }
+
+        private async Task<AppUser> EnsureUserExistsAsync(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new KeyNotFoundException("Kullanıcı bulunamadı");
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                throw new KeyNotFoundException("Kullanıcı bulunamadı");
+
+            return user;
+        }
+
+        private async Task EnsureRoleAssignmentInputAsync(string userId, string role)
+        {
+            await EnsureUserExistsAsync(userId);
+
+            if (string.IsNullOrWhiteSpace(role))
+                throw new ArgumentException("Geçersiz rol bilgisi.");
+        }
+
+        private static void EnsureIdentityResult(IdentityResult result)
+        {
+            if (!result.Succeeded)
+                throw new Exception(string.Join(", ", result.Errors));
         }
     }
 }

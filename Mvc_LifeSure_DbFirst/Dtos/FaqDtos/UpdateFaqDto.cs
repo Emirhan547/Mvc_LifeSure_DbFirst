@@ -10,6 +10,6 @@ namespace Mvc_LifeSure_DbFirst.Dtos.FaqDtos
         public int Id { get; set; }
         public string Question { get; set; }
         public string Answer { get; set; }
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; }=string.Empty;
     }
 }

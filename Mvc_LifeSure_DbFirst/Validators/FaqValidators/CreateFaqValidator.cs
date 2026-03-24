@@ -13,7 +13,7 @@ namespace Mvc_LifeSure_DbFirst.Validators.FaqValidators
         {
             RuleFor(x => x.Answer).NotEmpty().WithMessage("Cevap Boş Bırakılamaz");
             RuleFor(x => x.Question).NotEmpty().WithMessage("Soru Boş Bırakılamaz");
-            RuleFor(x => x.ImageUrl).NotEmpty().WithMessage("Görsel Boş Bırakılamaz");
+           
         }
     }
 }

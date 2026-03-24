@@ -6,9 +6,11 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
+<!-- ✅ DATATABLES CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
+
 <div class="p-8 space-y-6">
 
-    <!-- Başlık Kartı -->
     <div class="rounded-2xl bg-gradient-to-r from-primary to-cyan-500 p-6 text-white shadow-lg shadow-primary/20">
         <h1 class="text-2xl font-bold">@ViewBag.PageTitle</h1>
         <p class="mt-1 text-sm text-white/90">
@@ -16,7 +18,6 @@
         </p>
     </div>
 
-    <!-- Veri Tablosu Kartı -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="flex justify-between items-center bg-gradient-to-r from-primary to-cyan-500 p-4 text-white">
             <h5 class="font-semibold flex items-center gap-2">
@@ -27,41 +28,34 @@
                 <i class="fas fa-arrow-left me-1"></i> Geri Dön
             </a>
         </div>
+
         <div class="p-4">
             <div class="overflow-x-auto">
-                <table class="table-auto w-full border border-slate-200 text-sm text-left">
-                    <thead class="bg-slate-100 text-slate-700 uppercase text-xs">
+                <table id="dataTable" class="display w-full">
+                    <thead>
                         <tr>
-                            <th class="px-4 py-2">ID</th>
-                            <th class="px-4 py-2">Şehir</th>
-                            <th class="px-4 py-2">Tarih</th>
-                            <th class="px-4 py-2">Satış Sayısı</th>
-                            <th class="px-4 py-2">Toplam Prim</th>
-                            <th class="px-4 py-2">Yıl-Ay</th>
+                            <th>ID</th>
+                            <th>Şehir</th>
+                            <th>Tarih</th>
+                            <th>Satış Sayısı</th>
+                            <th>Toplam Prim</th>
+                            <th>Yıl-Ay</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody>
                         @if (Model != null && Model.Any())
                         {
                             foreach (var item in Model)
                             {
-                                <tr class="hover:bg-slate-50 transition">
-                                    <td class="px-4 py-2">@item.Id</td>
-                                    <td class="px-4 py-2">@item.City</td>
-                                    <td class="px-4 py-2">@item.SaleDate.ToString("dd.MM.yyyy")</td>
-                                    <td class="px-4 py-2">@item.SaleCount</td>
-                                    <td class="px-4 py-2">@item.TotalPremium.ToString("C0")</td>
-                                    <td class="px-4 py-2">@item.YearMonth</td>
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.City</td>
+                                    <td>@item.SaleDate.ToString("dd.MM.yyyy")</td>
+                                    <td>@item.SaleCount</td>
+                                    <td>@item.TotalPremium.ToString("C0")</td>
+                                    <td>@item.YearMonth</td>
                                 </tr>
                             }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="6" class="px-4 py-6 text-center text-slate-400">
-                                    Henüz veri bulunmuyor.
-                                </td>
-                            </tr>
                         }
                     </tbody>
                 </table>
@@ -72,16 +66,21 @@
 </div>
 
 @section Scripts {
+
+    <!-- ✅ jQuery (yoksa şart) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- ✅ DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
     <script>
         $(document).ready(function () {
             $('#dataTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json' },
-                order: [[0, 'desc']],
-                stripeClasses: [],
-                pagingType: "simple_numbers",
-                columnDefs: [
-                    { targets: "_all", className: 'align-middle' }
-                ]
+                pageLength: 100,
+                paging: true,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                }
             });
         });
     </script>

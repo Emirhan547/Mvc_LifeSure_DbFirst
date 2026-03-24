@@ -323,6 +323,7 @@
     <Compile Include="Dtos\BlogDtos\CreateBlogDto.cs" />
     <Compile Include="Dtos\BlogDtos\ResultBlogDto.cs" />
     <Compile Include="Dtos\BlogDtos\UpdateBlogDto.cs" />
+    <Compile Include="Dtos\CommonDtos\DateRangeDto.cs" />
     <Compile Include="Dtos\ContactMessageDtos\CreateContactMessageDto.cs" />
     <Compile Include="Dtos\ContactMessageDtos\ResultContactMessageDto.cs" />
     <Compile Include="Dtos\DashboardDtos\AdminDashboardViewModel.cs" />
@@ -344,6 +345,9 @@
     <Compile Include="Dtos\PolicyDtos\ResultPolicyDto.cs" />
     <Compile Include="Dtos\PolicyDtos\ResultPolicySimpleDto.cs" />
     <Compile Include="Dtos\PolicyDtos\UpdatePolicyDto.cs" />
+    <Compile Include="Dtos\PolicyManagementDtos\PolicyManagementFilterDto.cs" />
+    <Compile Include="Dtos\PolicyManagementDtos\PolicyManagementIndexViewModel.cs" />
+    <Compile Include="Dtos\PolicyManagementDtos\PolicySummaryDto.cs" />
     <Compile Include="Dtos\PolicySaleDataDtos\CreatePolicySaleDataDto.cs" />
     <Compile Include="Dtos\PolicySaleDataDtos\ForecastResultDto.cs" />
     <Compile Include="Dtos\PolicySaleDataDtos\ResultPolicySaleDataDto.cs" />

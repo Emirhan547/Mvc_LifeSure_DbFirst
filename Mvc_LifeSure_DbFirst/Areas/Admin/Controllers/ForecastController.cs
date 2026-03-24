@@ -11,32 +11,28 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
     public class ForecastController : AdminBaseController
     {
         private readonly IForecastService _forecastService;
-        private readonly IPolicySaleDataService _saleDataService;
 
-        public ForecastController(
-            IAdminLogService logService,
-            IForecastService forecastService,
-            IPolicySaleDataService saleDataService) : base(logService)
+
+        public ForecastController(IAdminLogService logService, IForecastService forecastService) : base(logService)
         {
             _forecastService = forecastService;
-            _saleDataService = saleDataService;
+           
         }
 
-        // GET: Admin/Forecast
+      
         public ActionResult Index()
         {
-            var cities = GetDistinctCities();
-            ViewBag.Cities = new SelectList(cities);
+            ViewBag.Cities = new SelectList(_forecastService.GetAvailableCities());
             return View();
         }
 
-        // GET: Admin/Forecast/Dashboard
+      
         public ActionResult Dashboard()
         {
             return View();
         }
 
-        // POST: Admin/Forecast/GetForecast  (AJAX)
+      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> GetForecast(string city, int months = 3)
@@ -56,7 +52,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/Forecast/GetAllForecasts  (AJAX)
+  
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> GetAllForecasts(int months = 3)
@@ -72,7 +68,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/Forecast/GetYearlyForecast  (AJAX)
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> GetYearlyForecast(int year)
@@ -88,7 +84,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/Forecast/TrainModel  (AJAX)
+      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> TrainModel(string city)
@@ -108,7 +104,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/Forecast/ValidateForecast  (AJAX)
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ValidateForecast(string city, int months = 6)
@@ -118,9 +114,8 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
 
             try
             {
-                var endDate = DateTime.Now.AddMonths(-1);
-                var startDate = endDate.AddMonths(-months * 2);
-                var accuracy = await _forecastService.ValidateForecastAsync(city, startDate, endDate);
+                var range = _forecastService.GetValidationDateRange(months);
+                var accuracy = await _forecastService.ValidateForecastAsync(city, range.StartDate, range.EndDate);
                 return Json(new { success = true, accuracy });
             }
             catch (Exception ex)
@@ -129,7 +124,6 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/Forecast/ExportForecast
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ExportForecast(string city, int months)
@@ -149,7 +143,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/Forecast/GetDashboardData  (AJAX)
+   
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> GetDashboardData()
@@ -166,15 +160,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // ---- Özel yardımcı ----
-        private System.Collections.Generic.List<string> GetDistinctCities()
-        {
-            return _saleDataService.GetAll()
-                .Select(x => x.City)
-                .Where(c => !string.IsNullOrWhiteSpace(c))
-                .Distinct()
-                .OrderBy(c => c)
-                .ToList();
-        }
+
+      
     }
 }

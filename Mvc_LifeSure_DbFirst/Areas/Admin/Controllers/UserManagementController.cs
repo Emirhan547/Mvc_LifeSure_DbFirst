@@ -15,41 +15,34 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
 {
     public class UserManagementController : AdminBaseController
     {
+        private static readonly List<string> AvailableRoles = new List<string> { "Admin", "User", "Agent" };
         private readonly IAppUserService _userService;
-        private AppUserManager _userManager;
 
-        public UserManagementController(
-            IAdminLogService logService,
-            IAppUserService userService,
-            AppUserManager userManager) : base(logService)
+
+        public UserManagementController(IAdminLogService logService, IAppUserService userService) : base(logService)
         {
             _userService = userService;
-            _userManager = userManager;
+          
         }
 
-        private AppUserManager UserManager =>
-            _userManager ?? HttpContext.GetOwinContext().GetUserManager<AppUserManager>();
-
-        // GET: Admin/UserManagement
+        
         public async Task<ActionResult> Index()
         {
             var users = await _userService.GetAllUsersAsync();
             return View(users);
         }
 
-        // GET: Admin/UserManagement/Details/id
+        
         public async Task<ActionResult> Details(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
                 return HttpNotFound();
 
             try
             {
                 var user = await _userService.GetUserWithPoliciesAsync(id);
-                if (user == null) return HttpNotFound();
-
-                var roles = await UserManager.GetRolesAsync(id);
-                ViewBag.UserRoles = roles;
+                ViewBag.UserRoles = await _userService.GetUserRolesAsync(id);
+              
                 return View(user);
             }
             catch (Exception ex)
@@ -59,16 +52,16 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // GET: Admin/UserManagement/Edit/id
+       
         public async Task<ActionResult> Edit(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
                 return HttpNotFound();
 
             try
             {
                 var user = await _userService.GetUserByIdAsync(id);
-                if (user == null) return HttpNotFound();
+               
 
                 var updateDto = new UpdateAppUserDto
                 {
@@ -91,7 +84,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/UserManagement/Edit
+    
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(UpdateAppUserDto updateDto)
@@ -113,12 +106,12 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/UserManagement/ToggleStatus  (AJAX)
+      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ToggleStatus(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
                 return Json(new { success = false, message = "Geçersiz kullanıcı kimliği." });
 
             try
@@ -135,12 +128,12 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/UserManagement/Delete  (AJAX)
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
                 return Json(new { success = false, message = "Geçersiz kullanıcı kimliği." });
 
             try
@@ -156,38 +149,39 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // GET: Admin/UserManagement/ManageRoles/id
+    
         public async Task<ActionResult> ManageRoles(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
                 return HttpNotFound();
 
-            var user = await UserManager.FindByIdAsync(id);
-            if (user == null) return HttpNotFound();
-
-            var userRoles = await UserManager.GetRolesAsync(id);
-            ViewBag.UserId = id;
-            ViewBag.UserName = user.UserName;
-            ViewBag.UserRoles = userRoles;
-            ViewBag.AllRoles = new List<string> { "Admin", "User", "Agent" };
-            return View();
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(id);
+                ViewBag.UserId = id;
+                ViewBag.UserName = user.UserName;
+                ViewBag.UserRoles = await _userService.GetUserRolesAsync(id);
+                ViewBag.AllRoles = AvailableRoles;
+                return View();
+            }
+            catch
+            {
+                return HttpNotFound();
+            }
         }
 
-        // POST: Admin/UserManagement/AddRole  (AJAX)
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddRole(string userId, string role)
         {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(role))
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(role))
                 return Json(new { success = false, message = "Geçersiz parametre." });
 
             try
             {
-                var result = await UserManager.AddToRoleAsync(userId, role);
-                if (!result.Succeeded)
-                    return Json(new { success = false, message = string.Join(", ", result.Errors) });
-
-                var user = await UserManager.FindByIdAsync(userId);
+                await _userService.AddUserToRoleAsync(userId, role);
+                var user = await _userService.GetUserByIdAsync(userId);
                 LogAction($"{user?.UserName} kullanıcısına {role} rolü eklendi", "Update", "UserRoles");
                 return Json(new { success = true });
             }
@@ -197,21 +191,18 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/UserManagement/RemoveRole  (AJAX)
+     
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> RemoveRole(string userId, string role)
         {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(role))
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(role))
                 return Json(new { success = false, message = "Geçersiz parametre." });
 
             try
             {
-                var result = await UserManager.RemoveFromRoleAsync(userId, role);
-                if (!result.Succeeded)
-                    return Json(new { success = false, message = string.Join(", ", result.Errors) });
-
-                var user = await UserManager.FindByIdAsync(userId);
+                await _userService.RemoveUserFromRoleAsync(userId, role);
+                var user = await _userService.GetUserByIdAsync(userId);
                 LogAction($"{user?.UserName} kullanıcısından {role} rolü kaldırıldı", "Update", "UserRoles");
                 return Json(new { success = true });
             }

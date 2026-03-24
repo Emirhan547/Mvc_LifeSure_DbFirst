@@ -1,4 +1,5 @@
 ﻿using Mvc_LifeSure_DbFirst.Dtos.PolicyDtos;
+using Mvc_LifeSure_DbFirst.Dtos.PolicyManagementDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,5 +24,8 @@ namespace Mvc_LifeSure_DbFirst.Services.PolicyServices
         Dictionary<string, int> GetPolicyCountByCity();
         Dictionary<string, decimal> GetTotalPremiumByCity();
         string GeneratePolicyNumber();
+        List<ResultPolicyDto> GetFilteredPolicies(PolicyManagementFilterDto filter);
+        PolicySummaryDto GetPolicySummary(List<ResultPolicyDto> policies, DateTime? referenceDate = null);
+        List<string> GetAvailableCities();
     }
 }

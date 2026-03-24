@@ -2,6 +2,7 @@
 using Mapster;
 using Mvc_LifeSure_DbFirst.Data.Entities;
 using Mvc_LifeSure_DbFirst.Dtos.PolicyDtos;
+using Mvc_LifeSure_DbFirst.Dtos.PolicyManagementDtos;
 using Mvc_LifeSure_DbFirst.Repositories.PolicyRepositories;
 using System;
 using System.Collections.Generic;
@@ -66,54 +67,96 @@ namespace Mvc_LifeSure_DbFirst.Services.PolicyServices
 
         public List<ResultPolicyDto> GetPoliciesByUser(string userId)
         {
-            var policies = _policyRepository.GetPoliciesByUser(userId);  // Direkt string kullan
-            var result = new List<ResultPolicyDto>();
+            return _policyRepository.GetPoliciesByUser(userId)
+                 .Select(MapToResultDto)
+                 .ToList();
 
-            foreach (var policy in policies)
-            {
-                result.Add(MapToResultDto(policy));
-            }
-
-            return result;
+           
         }
-
         public List<ResultPolicyDto> GetPoliciesByPackage(int packageId)
         {
-            var policies = _policyRepository.GetPoliciesByPackage(packageId);
-            var result = new List<ResultPolicyDto>();
-
-            foreach (var policy in policies)
-            {
-                result.Add(MapToResultDto(policy));
-            }
-
-            return result;
+            return _policyRepository.GetPoliciesByPackage(packageId)
+                .Select(MapToResultDto)
+                .ToList();
         }
-
         public List<ResultPolicyDto> GetPoliciesByCity(string city)
         {
-            var policies = _policyRepository.GetPoliciesByCity(city);
-            var result = new List<ResultPolicyDto>();
-
-            foreach (var policy in policies)
-            {
-                result.Add(MapToResultDto(policy));
-            }
-
-            return result;
+            return _policyRepository.GetPoliciesByCity(city)
+                .Select(MapToResultDto)
+                .ToList();
         }
-
         public List<ResultPolicyDto> GetPoliciesByDateRange(DateTime startDate, DateTime endDate)
         {
-            var policies = _policyRepository.GetPoliciesByDateRange(startDate, endDate);
-            var result = new List<ResultPolicyDto>();
+            return _policyRepository.GetPoliciesByDateRange(startDate, endDate)
+                .Select(MapToResultDto)
+                .ToList();
+        }
 
-            foreach (var policy in policies)
+        public List<ResultPolicyDto> GetFilteredPolicies(PolicyManagementFilterDto filter)
+        {
+            filter = filter ?? new PolicyManagementFilterDto();
+            var today = DateTime.Today;
+
+            IEnumerable<ResultPolicyDto> query = GetAll();
+
+            if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
             {
-                result.Add(MapToResultDto(policy));
+                query = query.Where(policy => ContainsIgnoreCase(policy.PolicyNumber, filter.SearchTerm)
+                     || ContainsIgnoreCase(policy.UserFullName, filter.SearchTerm)
+                     || ContainsIgnoreCase(policy.PackageName, filter.SearchTerm));
             }
 
-            return result;
+            if (!string.IsNullOrWhiteSpace(filter.City))
+            {
+                query = query.Where(policy => string.Equals(policy.UserCity, filter.City, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (filter.PackageId.HasValue)
+            {
+                query = query.Where(policy => policy.InsurancePackageId == filter.PackageId.Value);
+            }
+
+            switch (filter.Status?.Trim().ToLowerInvariant())
+            {
+                case "active":
+                    query = query.Where(policy => policy.EndDate >= today);
+                    break;
+                case "expired":
+                    query = query.Where(policy => policy.EndDate < today);
+                    break;
+                case "expiring":
+                    query = query.Where(policy => policy.EndDate >= today && policy.EndDate <= today.AddDays(30));
+                    break;
+            }
+
+            return query.OrderByDescending(policy => policy.CreatedAt).ToList();
+        }
+
+        public PolicySummaryDto GetPolicySummary(List<ResultPolicyDto> policies, DateTime? referenceDate = null)
+        {
+            var policyList = policies ?? new List<ResultPolicyDto>();
+            var today = referenceDate?.Date ?? DateTime.Today;
+            var expiringLimit = today.AddDays(30);
+
+
+            return new PolicySummaryDto
+            {
+                TotalPolicyCount = policyList.Count,
+                ActivePolicyCount = policyList.Count(policy => policy.EndDate >= today),
+                ExpiredPolicyCount = policyList.Count(policy => policy.EndDate < today),
+                ExpiringSoonCount = policyList.Count(policy => policy.EndDate >= today && policy.EndDate <= expiringLimit),
+                TotalPremium = policyList.Sum(policy => policy.PremiumAmount)
+            };
+        }
+
+        public List<string> GetAvailableCities()
+        {
+            return GetAll()
+                .Select(policy => policy.UserCity)
+                .Where(city => !string.IsNullOrWhiteSpace(city))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(city => city)
+                .ToList();
         }
 
         public void Create(CreatePolicyDto createDto)
@@ -127,7 +170,11 @@ namespace Mvc_LifeSure_DbFirst.Services.PolicyServices
             var policy = createDto.Adapt<Policy>();
             _policyRepository.Create(policy);
         }
-
+        private static bool ContainsIgnoreCase(string source, string value)
+        {
+            return !string.IsNullOrWhiteSpace(source)
+                && source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
         public void Update(UpdatePolicyDto updateDto)
         {
             _updateValidator.ValidateAndThrow(updateDto);

@@ -1,4 +1,5 @@
 ﻿using Mvc_LifeSure_DbFirst.Dtos.PolicyDtos;
+using Mvc_LifeSure_DbFirst.Dtos.PolicyManagementDtos;
 using Mvc_LifeSure_DbFirst.Services.AdminLogServices;
 using Mvc_LifeSure_DbFirst.Services.AppUserServices;
 using Mvc_LifeSure_DbFirst.Services.InsurancePackageServices;
@@ -29,62 +30,24 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
             _packageService = packageService;
         }
 
-        public ActionResult Index(string searchTerm, string city, string status, int? packageId)
+        public ActionResult Index(PolicyManagementFilterDto filter)
         {
-            var allPolicies = _policyService.GetAll();
-            var policies = allPolicies;
-
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            var policies = _policyService.GetFilteredPolicies(filter);
+            var viewModel = new PolicyManagementIndexViewModel
             {
-                policies = policies.Where(x =>
-                    x.PolicyNumber.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    x.UserFullName.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    x.PackageName.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
-            }
+                Policies = policies,
+                Cities = _policyService.GetAvailableCities(),
+                Packages = _packageService.GetActivePackages(),
+                Filters = filter ?? new PolicyManagementFilterDto(),
+                Summary = _policyService.GetPolicySummary(policies)
+            };
 
-            if (!string.IsNullOrWhiteSpace(city))
-            {
-                policies = policies.Where(x => string.Equals(x.UserCity, city, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-
-            if (packageId.HasValue)
-            {
-                policies = policies.Where(x => x.InsurancePackageId == packageId.Value).ToList();
-            }
-
-            var today = DateTime.Today;
-            if (string.Equals(status, "active", StringComparison.OrdinalIgnoreCase))
-            {
-                policies = policies.Where(x => x.EndDate >= today).ToList();
-            }
-            else if (string.Equals(status, "expired", StringComparison.OrdinalIgnoreCase))
-            {
-                policies = policies.Where(x => x.EndDate < today).ToList();
-            }
-            else if (string.Equals(status, "expiring", StringComparison.OrdinalIgnoreCase))
-            {
-                policies = policies.Where(x => x.EndDate >= today && x.EndDate <= today.AddDays(30)).ToList();
-            }
-
-            ViewBag.TotalPolicyCount = policies.Count;
-            ViewBag.ActivePolicyCount = policies.Count(x => x.EndDate >= today);
-            ViewBag.ExpiredPolicyCount = policies.Count(x => x.EndDate < today);
-            ViewBag.ExpiringSoonCount = policies.Count(x => x.EndDate >= today && x.EndDate <= today.AddDays(30));
-            ViewBag.TotalPremium = policies.Sum(x => x.PremiumAmount);
-            ViewBag.Cities = allPolicies.Select(x => x.UserCity).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().OrderBy(x => x).ToList();
-            ViewBag.Packages = _packageService.GetActivePackages();
-            ViewBag.SearchTerm = searchTerm;
-            ViewBag.SelectedCity = city;
-            ViewBag.SelectedStatus = status;
-            ViewBag.SelectedPackageId = packageId;
-
-            return View(policies.OrderByDescending(x => x.CreatedAt).ToList());
+            return View(viewModel);
         }
 
         public async Task<ActionResult> Create()
         {
-            ViewBag.Users = await _userService.GetAllUsersAsync();
-            ViewBag.Packages = _packageService.GetActivePackages();
+            await PopulateCreateEditLookupsAsync();
             return View();
         }
 
@@ -105,20 +68,18 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
                     LogAction(
                         $"{user?.FirstName} {user?.LastName} için {package?.PackageName} poliçesi oluşturuldu (No: {createDto.PolicyNumber})",
                         "Create",
-                        "Policies"
-                    );
+                       "Policies");
 
                     TempData["SuccessMessage"] = "Poliçe başarıyla oluşturuldu.";
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", ex.Message);
+                    ModelState.AddModelError(string.Empty, ex.Message);
                 }
             }
 
-            ViewBag.Users = await _userService.GetAllUsersAsync();
-            ViewBag.Packages = _packageService.GetActivePackages();
+            await PopulateCreateEditLookupsAsync();
             return View(createDto);
         }
 
@@ -138,8 +99,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
                     InsurancePackageId = policy.InsurancePackageId
                 };
 
-                ViewBag.Users = await _userService.GetAllUsersAsync();
-                ViewBag.Packages = _packageService.GetActivePackages();
+                await PopulateCreateEditLookupsAsync();
 
                 return View(updateDto);
             }
@@ -160,24 +120,18 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
                 {
                     _policyService.Update(updateDto);
 
-                    LogAction(
-                        $"{updateDto.PolicyNumber} poliçesi güncellendi",
-                        "Update",
-                        "Policies",
-                        updateDto.Id
-                    );
+                    LogAction($"{updateDto.PolicyNumber} poliçesi güncellendi", "Update", "Policies", updateDto.Id);
 
                     TempData["SuccessMessage"] = "Poliçe başarıyla güncellendi.";
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", ex.Message);
+                    ModelState.AddModelError(string.Empty, ex.Message);
                 }
             }
 
-            ViewBag.Users = await _userService.GetAllUsersAsync();
-            ViewBag.Packages = _packageService.GetActivePackages();
+            await PopulateCreateEditLookupsAsync();
             return View(updateDto);
         }
 
@@ -203,12 +157,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
                 var policy = _policyService.GetById(id);
                 _policyService.Delete(id);
 
-                LogAction(
-                    $"{policy.PolicyNumber} poliçesi silindi",
-                    "Delete",
-                    "Policies",
-                    id
-                );
+                LogAction($"{policy.PolicyNumber} poliçesi silindi", "Delete", "Policies", id);
 
                 return Json(new { success = true });
             }
@@ -238,6 +187,11 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         public ActionResult FilterByDate(DateTime startDate, DateTime endDate)
         {
             return RedirectToAction(nameof(Index), new { startDate, endDate });
+        }
+        private async Task PopulateCreateEditLookupsAsync()
+        {
+            ViewBag.Users = await _userService.GetAllUsersAsync();
+            ViewBag.Packages = _packageService.GetActivePackages();
         }
     }
 }

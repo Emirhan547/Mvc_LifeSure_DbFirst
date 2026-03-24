@@ -17,5 +17,8 @@ namespace Mvc_LifeSure_DbFirst.Services.AppUserServices
         Task DeleteUserAsync(string id);
         Task<bool> ToggleUserStatusAsync(string id);
         Task<int> GetTotalUserCountAsync();
+        Task<IList<string>> GetUserRolesAsync(string id);
+        Task AddUserToRoleAsync(string userId, string role);
+        Task RemoveUserFromRoleAsync(string userId, string role);
     }
 }

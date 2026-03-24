@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Mvc_LifeSure_DbFirst.Dtos.PolicyDtos.ResultPolicyDto>
+﻿﻿@model Mvc_LifeSure_DbFirst.Dtos.PolicyManagementDtos.PolicyManagementIndexViewModel
 @{
     ViewBag.Title = "Poliçe Yönetimi";
     ViewBag.PageTitle = "Poliçe Yönetimi";
@@ -22,115 +22,117 @@
             <a href="@Url.Action("Create")" class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-primary hover:bg-slate-100">Yeni Poliçe</a>
         </div>
     </div>
-</div>
 
-<div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Toplam Poliçe</p><p class="mt-2 text-3xl font-bold text-slate-800">@ViewBag.TotalPolicyCount</p></div>
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Aktif</p><p class="mt-2 text-3xl font-bold text-emerald-600">@ViewBag.ActivePolicyCount</p></div>
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">30 Gün İçinde Biten</p><p class="mt-2 text-3xl font-bold text-amber-600">@ViewBag.ExpiringSoonCount</p></div>
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Toplam Prim</p><p class="mt-2 text-3xl font-bold text-slate-800">@(((decimal)ViewBag.TotalPremium).ToString("C0"))</p></div>
-</div>
-
-<div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-    <div class="border-b border-slate-200 px-5 py-4">
-        <h2 class="text-lg font-semibold text-slate-800">Filtreler</h2>
-    </div>
-    @using (Html.BeginForm("Index", "PolicyManagement", FormMethod.Get, new { @class = "grid grid-cols-1 gap-4 p-5 md:grid-cols-2 xl:grid-cols-5" }))
-    {
-        <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="rounded-xl border-slate-300" placeholder="Poliçe no, müşteri, paket" />
-        <select name="city" class="rounded-xl border-slate-300">
-            <option value="">Tüm şehirler</option>
-            @foreach (var city in (IEnumerable<string>)ViewBag.Cities)
-            {
-                <option value="@city" @(string.Equals(ViewBag.SelectedCity as string, city) ? "selected" : null)>@city</option>
-            }
-        </select>
-        <select name="status" class="rounded-xl border-slate-300">
-            <option value="">Tüm durumlar</option>
-            <option value="active" @(string.Equals(ViewBag.SelectedStatus as string, "active") ? "selected" : null)>Aktif</option>
-            <option value="expiring" @(string.Equals(ViewBag.SelectedStatus as string, "expiring") ? "selected" : null)>Yakında Bitecek</option>
-            <option value="expired" @(string.Equals(ViewBag.SelectedStatus as string, "expired") ? "selected" : null)>Süresi Dolmuş</option>
-        </select>
-        <select name="packageId" class="rounded-xl border-slate-300">
-            <option value="">Tüm paketler</option>
-            @foreach (var package in (IEnumerable<dynamic>)ViewBag.Packages)
-            {
-                <option value="@package.Id" @(ViewBag.SelectedPackageId != null && (int)ViewBag.SelectedPackageId == package.Id ? "selected" : null)>@package.PackageName</option>
-            }
-        </select>
-        <div class="flex gap-2">
-            <button type="submit" class="flex-1 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white">Filtrele</button>
-            <a href="@Url.Action("Index")" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600">Temizle</a>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Toplam Poliçe</p><p class="mt-2 text-3xl font-bold text-slate-800">@Model.Summary.TotalPolicyCount</p></div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Aktif</p><p class="mt-2 text-3xl font-bold text-emerald-600">@Model.Summary.ActivePolicyCount</p></div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">30 Gün İçinde Biten</p><p class="mt-2 text-3xl font-bold text-amber-600">@Model.Summary.ExpiringSoonCount</p></div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Toplam Prim</p><p class="mt-2 text-3xl font-bold text-slate-800">@Model.Summary.TotalPremium.ToString("C0")</p></div>
         </div>
-    }
+      
+                        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-4">
+                                <h2 class="text-lg font-semibold text-slate-800">Filtreler</h2>
+                            </div>
+                            @using (Html.BeginForm("Index", "PolicyManagement", FormMethod.Get, new { @class = "grid grid-cols-1 gap-4 p-5 md:grid-cols-2 xl:grid-cols-5" }))
+                            {
+                                <input type="text" name="searchTerm" value="@Model.Filters.SearchTerm" class="rounded-xl border-slate-300" placeholder="Poliçe no, müşteri, paket" />
+                                <select name="city" class="rounded-xl border-slate-300">
+                                    <option value="">Tüm şehirler</option>
+                                    @foreach (var city in Model.Cities)
+                                    {
+                                        
+                                <option value="@city" @(string.Equals(Model.Filters.City, city) ? "selected" : null)>@city</option>
+                            }
+                                   
+                                    </select>
+                                    <select name="status" class="rounded-xl border-slate-300">
+                                        <option value="">Tüm durumlar</option>
+                                        <option value="active" @(string.Equals(Model.Filters.Status, "active") ? "selected" : null)>Aktif</option>
+                                        <option value="expiring" @(string.Equals(Model.Filters.Status, "expiring") ? "selected" : null)>Yakında Bitecek</option>
+                                        <option value="expired" @(string.Equals(Model.Filters.Status, "expired") ? "selected" : null)>Süresi Dolmuş</option>
+                                    </select>
+                                    <select name="packageId" class="rounded-xl border-slate-300">
+                                        <option value="">Tüm paketler</option>
+                                        @foreach (var package in Model.Packages)
+                                        {
+                                        <option value="@package.Id" @(Model.Filters.PackageId == package.Id ? "selected" : null)>@package.PackageName</option>
+                                    }
+                                   
+                                </select>
+                                <div class="flex gap-2">
+                                    <button type="submit" class="flex-1 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white">Filtrele</button>
+                                    <a href="@Url.Action("Index")" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600">Temizle</a>
+                                </div>
+                            }
+                        </div>
+            
 
-</div>
-
-<div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 text-left text-slate-700">
-                <tr>
-                    <th class="px-4 py-3 font-semibold">No</th>
-                    <th class="px-4 py-3 font-semibold">Müşteri</th>
-                    <th class="px-4 py-3 font-semibold">Şehir</th>
-                    <th class="px-4 py-3 font-semibold">Paket</th>
-                    <th class="px-4 py-3 font-semibold">Prim</th>
-                    <th class="px-4 py-3 font-semibold">Bitiş</th>
-                    <th class="px-4 py-3 font-semibold">Durum</th>
-                    <th class="px-4 py-3 text-right font-semibold">İşlemler</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var item in Model)
-                    {
-                        var isExpired = item.EndDate < DateTime.Today;
-                        var isExpiringSoon = item.EndDate >= DateTime.Today && item.EndDate <= DateTime.Today.AddDays(30);
-                        <tr class="border-t border-slate-100">
-                            <td class="px-4 py-3 text-slate-700">@item.PolicyNumber</td>
-                            <td class="px-4 py-3 text-slate-700">@item.UserFullName</td>
-                            <td class="px-4 py-3 text-slate-700">@(item.UserCity ?? "-")</td>
-                            <td class="px-4 py-3 text-slate-700">@item.PackageName</td>
-                            <td class="px-4 py-3 text-slate-700">@item.PremiumAmount.ToString("C")</td>
-                            <td class="px-4 py-3 text-slate-700">@item.EndDate.ToString("dd.MM.yyyy")</td>
-                            <td class="px-4 py-3">
-                                @if (isExpired)
+                <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-50 text-left text-slate-700">
+                                <tr>
+                                    <th class="px-4 py-3 font-semibold">No</th>
+                                    <th class="px-4 py-3 font-semibold">Müşteri</th>
+                                    <th class="px-4 py-3 font-semibold">Şehir</th>
+                                    <th class="px-4 py-3 font-semibold">Paket</th>
+                                    <th class="px-4 py-3 font-semibold">Prim</th>
+                                    <th class="px-4 py-3 font-semibold">Bitiş</th>
+                                    <th class="px-4 py-3 font-semibold">Durum</th>
+                                    <th class="px-4 py-3 text-right font-semibold">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Policies != null && Model.Policies.Any())
                                 {
-                                    <span class="rounded-lg bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700">Süresi Dolmuş</span>
-                                }
-                                else if (isExpiringSoon)
-                                {
-                                    <span class="rounded-lg bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">Yakında Bitecek</span>
+                                    foreach (var item in Model.Policies)
+                                    {
+                                        var isExpired = item.EndDate < DateTime.Today;
+                                        var isExpiringSoon = item.EndDate >= DateTime.Today && item.EndDate <= DateTime.Today.AddDays(30);
+                                        <tr class="border-t border-slate-100">
+                                            <td class="px-4 py-3 text-slate-700">@item.PolicyNumber</td>
+                                            <td class="px-4 py-3 text-slate-700">@item.UserFullName</td>
+                                            <td class="px-4 py-3 text-slate-700">@(item.UserCity ?? "-")</td>
+                                            <td class="px-4 py-3 text-slate-700">@item.PackageName</td>
+                                            <td class="px-4 py-3 text-slate-700">@item.PremiumAmount.ToString("C")</td>
+                                            <td class="px-4 py-3 text-slate-700">@item.EndDate.ToString("dd.MM.yyyy")</td>
+                                            <td class="px-4 py-3">
+                                                @if (isExpired)
+                                                {
+                                                    <span class="rounded-lg bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700">Süresi Dolmuş</span>
+                                                }
+                                                else if (isExpiringSoon)
+                                                {
+                                                    <span class="rounded-lg bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">Yakında Bitecek</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="rounded-lg bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Aktif</span>
+                                                }
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <div class="flex justify-end gap-2">
+                                                    <a href="@Url.Action("Details", new { id = item.Id })" class="rounded-lg bg-sky-100 px-3 py-1.5 font-medium text-sky-700">Detay</a>
+                                                    <a href="@Url.Action("Edit", new { id = item.Id })" class="rounded-lg bg-amber-100 px-3 py-1.5 font-medium text-amber-700">Düzenle</a>
+                                                    <button class="delete-btn rounded-lg bg-rose-100 px-3 py-1.5 font-medium text-rose-700" data-id="@item.Id">Sil</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
                                 }
                                 else
                                 {
-                                    <span class="rounded-lg bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Aktif</span>
+                                    <tr><td colspan="8" class="px-4 py-10 text-center text-slate-500">Filtrelere uygun poliçe bulunamadı.</td></tr>
                                 }
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="flex justify-end gap-2">
-                                    <a href="@Url.Action("Details", new { id = item.Id })" class="rounded-lg bg-sky-100 px-3 py-1.5 font-medium text-sky-700">Detay</a>
-                                    <a href="@Url.Action("Edit", new { id = item.Id })" class="rounded-lg bg-amber-100 px-3 py-1.5 font-medium text-amber-700">Düzenle</a>
-                                    <button class="delete-btn rounded-lg bg-rose-100 px-3 py-1.5 font-medium text-rose-700" data-id="@item.Id">Sil</button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr><td colspan="8" class="px-4 py-10 text-center text-slate-500">Filtrelere uygun poliçe bulunamadı.</td></tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-
-@section Scripts {
-    <script>
+            @section Scripts {
+                <script>
         $(function () {
             var antiForgeryToken = $("#antiForgeryForm input[name='__RequestVerificationToken']").val();
 
@@ -148,7 +150,6 @@
                 });
             });
         });
-    </script>
-}
-}
-
+                </script>
+            }
+            
