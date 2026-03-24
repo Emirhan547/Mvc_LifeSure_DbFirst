@@ -51,7 +51,7 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
                 PremiumDistribution = _policyService.GetTotalPremiumByCity(),
                 RecentPolicies = _policyService.GetAllSimple().OrderByDescending(x => x.Id).Take(8).ToList(),
                 RecentLogs = recentLogs,
-                ExpiringPolicyList = policies.Where(x => x.EndDate >= now && x.EndDate <= now.AddDays(30)).Take(6).ToList()
+                ExpiringPolicyList = policies.Where(x => x.EndDate >= now && x.EndDate <= now.AddDays(30)).Take(10).ToList()
             };
 
             LogAction("Dashboard görüntülendi", "View", "Dashboard");

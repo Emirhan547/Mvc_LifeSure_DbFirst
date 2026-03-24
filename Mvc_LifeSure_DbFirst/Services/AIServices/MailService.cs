@@ -74,7 +74,7 @@ namespace Mvc_LifeSure_DbFirst.Services.AIServices
             }
             catch (Exception ex)
             {
-                // Loglama yapılabilir
+            
                 throw;
             }
         }

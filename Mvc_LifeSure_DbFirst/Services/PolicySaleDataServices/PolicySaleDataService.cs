@@ -120,19 +120,18 @@ namespace Mvc_LifeSure_DbFirst.Services.PolicySaleDataServices
                 if (policies == null || !policies.Any())
                     continue;
 
-                var grouped = policies
-                    .GroupBy(p => new { p.City, p.Year, p.Month })
-                    .Select(g => new CreatePolicySaleDataDto
+                var policyRows = policies
+                    .Select(p => new CreatePolicySaleDataDto
                     {
-                        City = g.Key.City,
-                        SaleDate = new DateTime(g.Key.Year, GetMonthNumber(g.Key.Month), 1),
-                        SaleCount = g.Count(),
-                        TotalPremium = g.Sum(p => p.PremiumAmount)
+                        City = p.City,
+                        SaleDate = new DateTime(p.Year, GetMonthNumber(p.Month), 1),
+                        SaleCount = 1,
+                        TotalPremium = p.PremiumAmount
                     })
                     .ToList();
 
-                CreateBulk(grouped);
-                totalInserted += grouped.Count;
+                CreateBulk(policyRows);
+                totalInserted += policyRows.Count;
             }
 
             return totalInserted;

@@ -89,14 +89,16 @@ namespace Mvc_LifeSure_DbFirst.App_Start
         {
             kernel.Bind<AppDbContext>().ToSelf().InRequestScope();
 
-            // IDENTITY BINDINGS
-            kernel.Bind<IUserStore<AppUser>>().To<UserStore<AppUser>>().InRequestScope();
+            kernel.Bind<IUserStore<AppUser, string>>().ToMethod(context =>
+                 new UserStore<AppUser, AppRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>(
+                     context.Kernel.Get<AppDbContext>()))
+                 .InRequestScope();
             kernel.Bind<IRoleStore<AppRole, string>>().To<RoleStore<AppRole>>().InRequestScope();
 
             // AppUserManager binding'i
             kernel.Bind<AppUserManager>().ToMethod(context =>
             {
-                var userStore = context.Kernel.Get<IUserStore<AppUser>>();
+                var userStore = context.Kernel.Get<IUserStore<AppUser, string>>();
                 return new AppUserManager(userStore);
             }).InRequestScope();
 

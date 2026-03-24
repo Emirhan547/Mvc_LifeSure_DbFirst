@@ -1,6 +1,8 @@
 ﻿using Mvc_LifeSure_DbFirst.Services.AdminLogServices;
 using Mvc_LifeSure_DbFirst.Services.PolicySaleDataServices;
 using System;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 
@@ -20,8 +22,26 @@ namespace Mvc_LifeSure_DbFirst.Areas.Admin.Controllers
         // GET: Admin/DataGenerator
         public ActionResult Index()
         {
-            ViewBag.TotalPolicies = _saleDataService.GetTotalPolicyCount();
-            ViewBag.TotalPremium = _saleDataService.GetTotalPremium();
+            var allSales = _saleDataService.GetAll();
+            var currentYear = DateTime.Today.Year;
+            var monthlyCounts = allSales
+                .Where(x => x.SaleDate.Year == currentYear)
+                .GroupBy(x => x.SaleDate.Month)
+                .ToDictionary(g => g.Key, g => g.Sum(x => x.SaleCount));
+
+            var monthLabels = Enumerable.Range(1, 12)
+                .Select(month => CultureInfo.GetCultureInfo("tr-TR").DateTimeFormat.GetAbbreviatedMonthName(month))
+                .ToList();
+
+            var monthValues = Enumerable.Range(1, 12)
+                .Select(month => monthlyCounts.ContainsKey(month) ? monthlyCounts[month] : 0)
+                .ToList();
+
+            ViewBag.TotalPolicies = allSales.Sum(x => x.SaleCount);
+            ViewBag.TotalPremium = allSales.Sum(x => x.TotalPremium);
+            ViewBag.ChartYear = currentYear;
+            ViewBag.MonthLabels = monthLabels;
+            ViewBag.MonthValues = monthValues;
             return View();
         }
 

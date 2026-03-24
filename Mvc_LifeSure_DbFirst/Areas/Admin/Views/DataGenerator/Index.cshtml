@@ -6,6 +6,9 @@
 
     int totalPolicies = (int)(ViewBag.TotalPolicies ?? 0);
     decimal totalPremium = (decimal)(ViewBag.TotalPremium ?? 0m);
+    int chartYear = (int)(ViewBag.ChartYear ?? DateTime.Today.Year);
+    var monthLabelsJson = Html.Raw(Json.Encode(ViewBag.MonthLabels ?? new string[0]));
+    var monthValuesJson = Html.Raw(Json.Encode(ViewBag.MonthValues ?? new int[0]));
 }
 
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "antiForgeryForm", style = "display:none;" }))
@@ -83,7 +86,7 @@
 
   
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">Aylık Dağılım</h2>
+        <h2 class="text-lg font-semibold text-slate-800 mb-4">@chartYear Aylık Poliçe Hacmi</h2>
         <canvas id="distributionChart" style="max-height:260px;"></canvas>
     </div>
 </div>
@@ -184,14 +187,15 @@
                 });
             });
 
-            // ---- Dağılım grafiği (placeholder) ----
+           var monthLabels = @monthLabelsJson;
+            var monthValues = @monthValuesJson;
             new Chart(document.getElementById("distributionChart"), {
                 type: "bar",
                 data: {
-                    labels: ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"],
+                    labels: monthLabels,
                     datasets: [{
                         label: "Poliçe Sayısı",
-                        data: [0,0,0,0,0,0,0,0,0,0,0,0],
+                        data: monthValues,
                         backgroundColor: "#1193d4",
                         borderRadius: 8
                     }]
